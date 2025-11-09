@@ -1,1 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="utf-8" />
+<title>Cross Validation Accuracy (%) — D3.js Replication</title>
+<style>
+  html,body{margin:0;background:#fff}
+  svg{display:block;margin:0 auto;background:#fff}
+  text{font-family:"Times New Roman", Georgia, serif; fill:#111}
+  .axis-label{font-size:42px}
+  .big-title{font-size:50px; font-weight:480}
+  .tick-text{font-size:38px}
+  .model-text{font-size:56px}
+  .value-text{font-size:42px; transition:all .15s}
+  .frame{stroke:#6f6f6f; stroke-width:6; fill:none; stroke-linejoin:round}
+  .tick-mark{stroke:#6f6f6f; stroke-width:6}
+  .bar{fill:#e7c45f; stroke:#6f6f6f; stroke-width:6}
+  .ghost{
+  fill: rgba(0,0,0,0.001);   /* 肉眼不可见，但可命中 */
+  /* 或者：fill:#000; fill-opacity:0.001; */
+  pointer-events: all;       /* 确保填充区域也响应事件 */
+  stroke:#e7c45f;
+  stroke-width:6;
+  stroke-dasharray:16 16;
+}
+  /* 高亮效果 */
+  .highlight{fill:#c00; font-weight:700}
+</style>
+<body>
+<svg id="svg" width="990" height="511"></svg>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const svg = d3.select("#svg");
+
+// ------- 固定像素坐标 -------
+const frame = {x:119, y:35, width:957-119, height:433-35};
+
+// 三组实心柱（左/中/右）
+const solidBars = [
+  {x:172, yTop:236, yBot:431, w:229-172, value:74.4, model:"BERT"},
+  {x:471, yTop:215, yBot:434, w:531-471, value:81.9, model:"RoBERTa"},
+  {x:770, yTop:238, yBot:431, w:829-770, value:73.1, model:"BART"}
+];
+
+// 三组虚线柱（左/中/右）
+const dashedBars = [
+  {x:244, yTop:261, yBot:431, w:306-244, value:64.8},
+  {x:544, yTop:258, yBot:432, w:602-544, value:65.5},
+  {x:842, yTop:263, yBot:433, w:902-842, value:63.5}
+];
+
+// ------- 外框 -------
+svg.append("rect")
+   .attr("class","frame")
+   .attr("x", frame.x)
+   .attr("y", frame.y)
+   .attr("width", frame.width)
+   .attr("height", frame.height);
+
+// ------- 刻度 “100” 的两段短线：放在灰框内 -------
+svg.append("line")
+   .attr("class","tick-mark")
+   .attr("x1", 120).attr("y1", 169)
+   .attr("x2", 148).attr("y2", 169);
+
+svg.append("line")
+   .attr("class","tick-mark")
+   .attr("x1", 926).attr("y1", 169)
+   .attr("x2", 957).attr("y2", 169);
+
+// “100”“0” 文字
+svg.append("text")
+   .attr("class","tick-text")
+   .attr("x", 51).attr("y", 179)
+   .text("100");
+
+svg.append("text")
+   .attr("class","tick-text")
+   .attr("x", 77).attr("y", 443)
+   .text("0");
+
+// ------- 标题 -------
+svg.append("text")
+   .attr("class","big-title")
+   .attr("x", 540)
+   .attr("y", 100)
+   .attr("text-anchor", "middle")
+   .text("Cross Validation Accuracy (%)");
+
+// ------- 柱子（先虚线，再实心） -------
+const g = svg.append("g");
+
+// —— 虚线柱
+const ghost = g.selectAll(".ghost")
+ .data(dashedBars.map((d,i)=>({...d, idx:i})))
+ .enter()
+ .append("rect")
+ .attr("class","ghost")
+ .attr("x", d => d.x)
+ .attr("y", d => d.yBot)
+ .attr("width", d => d.w)
+ .attr("height", 0)
+ .transition().duration(800)
+ .attr("y", d => d.yTop)
+ .attr("height", d => d.yBot - d.yTop);
+
+// —— 实心柱
+const bars = g.selectAll(".bar")
+ .data(solidBars.map((d,i)=>({...d, idx:i})))
+ .enter()
+ .append("rect")
+ .attr("class","bar")
+ .attr("x", d => d.x)
+ .attr("y", d => d.yBot)
+ .attr("width", d => d.w)
+ .attr("height", 0)
+ .transition().duration(900).delay(100)
+ .attr("y", d => d.yTop)
+ .attr("height", d => d.yBot - d.yTop);
+
+// ------- 数值文本 -------
+const solidValues = [
+  {x: (172+229)/2, y: 236-8, t:"74.4", idx:0},
+  {x: (471+531)/2, y: 215-8, t:"81.9", idx:1},
+  {x: (770+829)/2, y: 238-8, t:"73.1", idx:2}
+];
+const dashedValues = [
+  {x: (244+306)/2, y: 261-8, t:"64.8", idx:0},
+  {x: (544+602)/2, y: 258-8, t:"65.5", idx:1},
+  {x: (842+902)/2, y: 263-8, t:"63.5", idx:2}
+];
+
+// 生成文字
+const solidTexts = svg.selectAll(".val-solid")
+  .data(solidValues).enter()
+  .append("text").attr("class","value-text val-solid")
+  .attr("x", d=>d.x).attr("y", d=>d.y).attr("text-anchor","middle")
+  .text(d=>d.t);
+
+const dashedTexts = svg.selectAll(".val-dash")
+  .data(dashedValues).enter()
+  .append("text").attr("class","value-text val-dash")
+  .attr("x", d=>d.x).attr("y", d=>d.y).attr("text-anchor","middle")
+  .text(d=>d.t);
+
+// ------- 悬停交互：实心柱和虚线柱都能高亮对应数字 -------
+function bindHighlight(selection, textSel) {
+  selection
+    .on("mouseenter", function(e, d){
+      textSel.classed("highlight", t => t.idx === d.idx);
+    })
+    .on("mouseleave", function(){
+      textSel.classed("highlight", false);
+    });
+}
+
+// 绑定交互
+bindHighlight(g.selectAll(".bar"), solidTexts);
+bindHighlight(g.selectAll(".ghost"), dashedTexts);
+
+// ------- 类别标签 -------
+const modelTexts = [
+  {x: 240, y: 500, text:"BERT"},
+  {x: 550, y: 500, text:"RoBERTa"},
+  {x: 840, y: 500, text:"BART"}
+];
+
+svg.selectAll(".model").data(modelTexts).enter()
+  .append("text").attr("class","model-text model")
+  .attr("x", d=>d.x).attr("y", d=>d.y).attr("text-anchor","middle")
+  .text(d=>d.text);
+</script>
+</body>
+</html>
 
