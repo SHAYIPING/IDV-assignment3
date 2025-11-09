@@ -7,132 +7,96 @@
 <link rel="stylesheet" href="styles.css"/>
 <style>
 /* 仅此页微调布局 */
-
-/* 1) 移除 iframe 滚动条和外框，自动撑满父容器 */
 .chart-slab{
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:8px;
+  background:#fff; border:1px solid var(--line); border-radius:8px;
   box-shadow:0 2px 14px rgba(0,0,0,.07);
-  padding:0;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
+  padding:0; overflow:hidden; display:flex; flex-direction:column;
 }
-.chart-frame{
-  width:100%;
-  aspect-ratio:16/9;      /* 根据宽度自动计算高度，完整显示 */
-  border:0;
-  display:block;
-  background:#fff;
-  overflow:hidden;
-  scrollbar-width:none;   /* Firefox */
-}
-.chart-frame::-webkit-scrollbar{ display:none; } /* Chrome/Edge */
+/* 让 iframe 初始高度合理，随后由脚本自适应覆盖 */
+.chart-frame{ width:100%; height:560px; border:0; display:block; background:#fff; overflow:hidden; }
 
-/* 2) 右侧 Notes 底部与左侧 chart 底部对齐 */
+/* Notes 与左侧底对齐 */
 .detail-wrap{ align-items:start; }
 .left-col,.right-col{ display:flex; flex-direction:column; }
-.notes{
-  flex-grow:1;
-  display:flex; flex-direction:column; justify-content:space-between;
-  height:100%;
-}
+.notes{ flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; height:100%; }
 
-/* 3) 图表下方两图并排，每图下自带说明文字 */
-.figure-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:18px;
-  margin-top:18px;
-}
-.figitem{
-  background:transparent;
-}
-.figitem .img{
-  width:100%;
-  background:#fff; border:1px solid var(--line); border-radius:6px;
-  overflow:hidden; box-shadow:0 1px 8px rgba(0,0,0,.05);
-}
+/* 两张说明图并排 */
+.figure-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+.figitem .img{ width:100%; background:#fff; border:1px solid var(--line); border-radius:6px; overflow:hidden; box-shadow:0 1px 8px rgba(0,0,0,.05); }
 .figitem .img img{ width:100%; height:auto; display:block; }
-.figitem .caption{
-  font-size:16px; color:#555; line-height:1.55;
-  margin-top:8px;
-}
-
-/* 窄屏下改为单列堆叠 */
-@media (max-width:800px){
-  .figure-grid{ grid-template-columns:1fr; }
-}
+.figitem .caption{ font-size:16px; color:#555; line-height:1.55; margin-top:8px; }
+@media (max-width:800px){ .figure-grid{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 
 <div class="detail-wrap">
-  <!-- 左列 -->
   <section class="left-col">
-    <div class="detail-title">
-      <h2>B</h2>
-    </div>
+    <div class="detail-title"><h2>B</h2></div>
 
-    <!-- 图表 -->
     <div class="chart-slab">
-      <iframe class="chart-frame" src="charts/B.html" title="Chart B" scrolling="no"></iframe>
+      <iframe class="chart-frame" id="chartB" src="charts/B.html" title="Chart B" scrolling="no"></iframe>
     </div>
 
-    <!-- 并排两张说明图，每张图的说明在其下方 -->
     <div class="figure-grid">
       <div class="figitem">
-        <div class="img">
-          <img src="figs/B-info.jpg" alt="说明图 B"/>
-        </div>
-        <div class="caption">
-          <strong>说明图 B：</strong>本图展示方案 B 的核心构型与坐标定位。
-        </div>
+        <div class="img"><img src="figs/B-info.jpg" alt="说明图 B"></div>
+        <div class="caption"><strong>说明图 B：</strong>方案 B 的核心构型与坐标定位。</div>
       </div>
-
       <div class="figitem">
-        <div class="img">
-          <img src="figs/B1-info.jpg" alt="说明图 B1"/>
-        </div>
-        <div class="caption">
-          <strong>说明图 B1：</strong>补充展示边界条件与关键标注，辅助理解交互细节。
-        </div>
+        <div class="img"><img src="figs/B1-info.jpg" alt="说明图 B1"></div>
+        <div class="caption"><strong>说明图 B1：</strong>补充边界条件与关键标注，辅助理解交互细节。</div>
       </div>
     </div>
   </section>
 
-  <!-- 右列：Notes -->
   <aside class="right-col">
     <div class="notes">
       <div>
         <h3>Notes</h3>
-
         <h4>Canvas &amp; Grid</h4>
         <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
-
         <h4>Key Points</h4>
         <ul>
           <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
           <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
         </ul>
-
-        <h4>Animation</h4>
-        <p>Stroke-dash trick draws lines in from start to end.</p>
-
-        <h4>Interaction</h4>
-        <p>A wide invisible hit stroke captures hover; a dot snaps to the closest point on the segment; a tooltip shows label and position.</p>
-
+        <h4>Animation</h4><p>Stroke-dash trick draws lines in from start to end.</p>
+        <h4>Interaction</h4><p>Wide invisible hit stroke + hover dot + tooltip.</p>
         <h4>Design Choices</h4>
-        <ul>
-          <li>Typeface: Times family to match slide style.</li>
-          <li>Grey background for poster-like layout.</li>
-        </ul>
+        <ul><li>Times family</li><li>Grey background</li></ul>
       </div>
       <div style="height:24px;"></div>
     </div>
   </aside>
 </div>
 
+<!-- 自适应 iframe 高度：load + postMessage 双方案 -->
+<script>
+(function(){
+  const frame = document.getElementById('chartB');
+
+  // 方案A：同源直接读取子文档高度
+  function resizeByRead(){
+    try{
+      const doc = frame.contentDocument || frame.contentWindow.document;
+      const h = Math.max(
+        doc.body.scrollHeight, doc.documentElement.scrollHeight,
+        doc.body.offsetHeight, doc.documentElement.offsetHeight
+      );
+      if (h && Math.abs(frame.clientHeight - h) > 5) frame.style.height = h + 'px';
+    }catch(e){ /* 跨域则忽略，走方案B */ }
+  }
+
+  frame.addEventListener('load', resizeByRead);
+
+  // 方案B：子页通过 postMessage 主动汇报高度
+  window.addEventListener('message', (e)=>{
+    if (!e.data || e.data.__chartHeight == null) return;
+    const H = Math.max(320, Math.min(1200, e.data.__chartHeight)); // 限定范围，避免异常
+    frame.style.height = H + 'px';
+  });
+})();
+</script>
 </body>
 </html>
