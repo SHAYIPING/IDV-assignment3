@@ -1,1 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Basis Vectors – hover dot</title>
+
+<!-- D3 + fallback -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>if(!window.d3){document.write('<script src="https://unpkg.com/d3@7/dist/d3.min.js"><\/script>')}</script>
+
+<style>
+  :root{
+    --bg:#ffffff;   /* 纯白背景 */
+    --ink:#222;
+    --grid:#cfd8e3;
+    --solid:#6b7280;
+    --dash1:#1f7a8c;
+    --dash2:#56b3b4;
+    --label:#111;
+  }
+  body{ margin:0; background:var(--bg); color:var(--ink);
+        font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
+  svg{ display:block; margin:24px auto; background:#fff; }
+  .grid line{ stroke:var(--grid); stroke-width:1 }
+  .vector{ stroke-linecap:round }
+  .vector.solid{ stroke:var(--solid); stroke-width:2 }
+  .vector.dash1{ stroke:var(--dash1); stroke-width:2; stroke-dasharray:8 8 }
+  .vector.dash2{ stroke:var(--dash2); stroke-width:2; stroke-dasharray:8 8 }
+  .hit{ stroke:transparent; stroke-width:30; pointer-events:stroke } /* 更大的命中带 */
+  .point{ fill:var(--ink) }
+  /* 标签：e 粗斜体；上标斜体；下标常规体 */
+  .label-e{ fill:var(--label); font-weight:700; font-style:italic }
+  .label-sup{ fill:var(--label); font-style:italic }
+  .label-sub{ fill:var(--label); font-weight:400; font-style:normal }
+  .tooltip{
+    position:fixed; pointer-events:none; padding:6px 8px;
+    background:#111; color:#fff; font-size:12px; border-radius:6px;
+    transform:translate(-50%,-140%); opacity:0; transition:opacity .15s ease;
+    white-space:nowrap
+  }
+</style>
+</head>
+<body>
+
+<svg id="viz" width="1100" height="440" viewBox="0 0 1100 440"></svg>
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+(function(){
+  if(!window.d3){ alert('D3 未加载'); return; }
+
+  const svg = d3.select("#viz");
+  const W = 1100, H = 440;
+
+  // ---------- grid ----------
+  const cols = 11, rows = 4, cell = 80;
+  const gridW = cols*cell, gridH = rows*cell;
+  const gx0 = (W-gridW)/2, gy0 = (H-gridH)/2;
+
+  const g = svg.append("g").attr("transform", `translate(${gx0},${gy0})`);
+  const grid = g.append("g").attr("class","grid");
+  for(let c=0;c<=cols;c++){
+    grid.append("line").attr("x1", c*cell).attr("y1", 0)
+                       .attr("x2", c*cell).attr("y2", gridH);
+  }
+  for(let r=0;r<=rows;r++){
+    grid.append("line").attr("x1", 0).attr("y1", r*cell)
+                       .attr("x2", gridW).attr("y2", r*cell);
+  }
+
+  // ---------- markers: V apex at end (wider angle) ----------
+  const defs = svg.append("defs");
+  function makeVMarker(id, color){
+    const m = defs.append("marker")
+      .attr("id", id)
+      .attr("viewBox","0 0 12 12")
+      .attr("refX", 12)     // 尖端在终点
+      .attr("refY", 6)
+      .attr("markerWidth", 9)
+      .attr("markerHeight", 9)
+      .attr("orient","auto")
+      .attr("markerUnits","strokeWidth");
+    // 分叉更大
+    m.append("path").attr("d","M12 6 L2 1")
+      .attr("fill","none").attr("stroke", color)
+      .attr("stroke-width", 2).attr("stroke-linecap","round");
+    m.append("path").attr("d","M12 6 L2 11")
+      .attr("fill","none").attr("stroke", color)
+      .attr("stroke-width", 2).attr("stroke-linecap","round");
+  }
+  makeVMarker("v1", "#1f7a8c");
+  makeVMarker("v2", "#56b3b4");
+
+  // ---------- helpers ----------
+  const P = (cx,cy)=>({x: cx*cell, y: cy*cell});
+  function closestPointOnSegment(ax,ay,bx,by, px,py){
+    const vx = bx-ax, vy = by-ay;
+    const wx = px-ax, wy = py-ay;
+    const vv = vx*vx + vy*vy || 1e-6;
+    let t = (wx*vx + wy*vy)/vv;
+    t = Math.max(0, Math.min(1, t));
+    return {x: ax + t*vx, y: ay + t*vy, t};
+  }
+
+  // ---------- points ----------
+  const pts = {
+    e_b2: P(3,3),
+    e_b1: P(6,3),
+    e_a2: P(5,1),
+    e_a1: P(8,1)
+  };
+
+  // ---------- vectors ----------
+  const vectors = [
+    {id:"s_b2_a2", type:"solid", color:"var(--solid)", from:pts.e_b2, to:pts.e_a2, label:"β₂ → α₂"},
+    {id:"s_b1_a1", type:"solid", color:"var(--solid)", from:pts.e_b1, to:pts.e_a1, label:"β₁ → α₁"},
+    {id:"s_b2_b1", type:"solid", color:"var(--solid)", from:pts.e_b2, to:pts.e_b1, label:"β₂ → β₁"},
+    {id:"s_a2_a1", type:"solid", color:"var(--solid)", from:pts.e_a2, to:pts.e_a1, label:"α₂ → α₁"},
+    {id:"d_a1_b2", type:"dash1", color:"#1f7a8c", from:pts.e_a1, to:pts.e_b2, label:"α₁ → β₂", marker:"url(#v1)"},
+    {id:"d_a2_b1", type:"dash2", color:"#56b3b4", from:pts.e_a2, to:pts.e_b1, label:"α₂ → β₁", marker:"url(#v2)"}
+  ];
+
+  const lineG = g.append("g");
+
+  // 可见线
+  const visPath = lineG.selectAll("line.vector")
+    .data(vectors)
+    .enter().append("line")
+    .attr("class", d=>`vector ${d.type}`)
+    .attr("x1", d=>d.from.x).attr("y1", d=>d.from.y)
+    .attr("x2", d=>d.from.x).attr("y2", d=>d.from.y)
+    .attr("marker-end", d=>d.marker||null);
+
+  // 入场动画（可见线）
+  visPath.each(function(d){
+    const len = Math.hypot(d.to.x - d.from.x, d.to.y - d.from.y);
+    d3.select(this)
+      .attr("stroke-dasharray", len)
+      .attr("stroke-dashoffset", len)
+      .transition().duration(1200).ease(d3.easeCubicOut)
+      .attr("x2", d.to.x).attr("y2", d.to.y)
+      .attr("stroke-dashoffset", 0);
+  });
+
+  // 命中带（不可见、粗）
+  const hitPath = lineG.selectAll("line.hit")
+    .data(vectors)
+    .enter().append("line")
+    .attr("class","hit")
+    .attr("x1", d=>d.from.x).attr("y1", d=>d.from.y)
+    .attr("x2", d=>d.to.x).attr("y2", d=>d.to.y);
+
+  // 悬停小圆点
+  const hoverDot = g.append("circle")
+    .attr("r", 5)
+    .attr("fill", "#111")
+    .attr("opacity", 0);
+
+  const tooltip = d3.select("#tooltip");
+
+  hitPath.on("mousemove", function(event, d){
+    // 计算最近点
+    const [mx,my] = d3.pointer(event, g.node());
+    const pt = closestPointOnSegment(d.from.x, d.from.y, d.to.x, d.to.y, mx, my);
+
+    hoverDot
+      .attr("cx", pt.x)
+      .attr("cy", pt.y)
+      .attr("fill", d.color)
+      .attr("opacity", 1);
+
+    tooltip
+      .style("left", event.clientX+"px")
+      .style("top",  event.clientY+"px")
+      .style("opacity", 1)
+      .html(`<b>${d.label}</b>
+             <div>t = ${pt.t.toFixed(2)}</div>
+             <div>(${Math.round(pt.x/cell)}, ${Math.round(pt.y/cell)})</div>`);
+  })
+  .on("mouseleave", function(){
+    hoverDot.attr("opacity", 0);
+    tooltip.style("opacity", 0);
+  });
+
+  // ---------- points + labels ----------
+  const ptsG = g.append("g");
+  ptsG.selectAll("circle.point")
+    .data(Object.values(pts))
+    .enter().append("circle")
+    .attr("class","point").attr("r",3.2)
+    .attr("cx", d=>d.x).attr("cy", d=>d.y);
+
+  const SIZE_E = 34, SIZE_SUP = 30, SIZE_SUB = 26;
+  function label(x,y, subTxt, supTxt){
+    const grp = ptsG.append("g").attr("transform",`translate(${x},${y})`);
+    grp.append("text").attr("class","label-e")
+      .attr("text-anchor","middle")
+      .attr("dominant-baseline","central")
+      .style("font-size", SIZE_E+"px")
+      .text("e");
+    grp.append("text").attr("class","label-sup")
+      .attr("x",18).attr("y",-12).style("font-size", SIZE_SUP+"px").text(supTxt);
+    grp.append("text").attr("class","label-sub")
+      .attr("x",18).attr("y",18).style("font-size", SIZE_SUB+"px").text(subTxt);
+  }
+
+  label(pts.e_a1.x + 55, pts.e_a1.y - 22, "1", "α");
+  label(pts.e_a2.x - 55, pts.e_a2.y - 22, "2", "α");
+  label(pts.e_b1.x + 55, pts.e_b1.y + 24, "1", "β");
+  label(pts.e_b2.x - 55, pts.e_b2.y + 24, "2", "β");
+})();
+</script>
+</body>
+</html>
 
