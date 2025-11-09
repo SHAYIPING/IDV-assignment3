@@ -3,34 +3,101 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>C – Assignment 3</title>
+<title>B – Assignment 3</title>
 <link rel="stylesheet" href="styles.css"/>
+<style>
+/* 仅此页微调布局 */
+
+/* 1) 移除 iframe 滚动条和外框，自动撑满父容器 */
+.chart-slab{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:8px;
+  box-shadow:0 2px 14px rgba(0,0,0,.07);
+  padding:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.chart-frame{
+  width:100%;
+  aspect-ratio:16/9;      /* 根据宽度自动计算高度，完整显示 */
+  border:0;
+  display:block;
+  background:#fff;
+  overflow:hidden;
+  scrollbar-width:none;   /* Firefox */
+}
+.chart-frame::-webkit-scrollbar{ display:none; } /* Chrome/Edge */
+
+/* 2) 右侧 Notes 底部与左侧 chart 底部对齐 */
+.detail-wrap{ align-items:start; }
+.left-col,.right-col{ display:flex; flex-direction:column; }
+.notes{
+  flex-grow:1;
+  display:flex; flex-direction:column; justify-content:space-between;
+  height:100%;
+}
+
+/* 3) 图表下方两图并排，每图下自带说明文字 */
+.figure-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:18px;
+  margin-top:18px;
+}
+.figitem{
+  background:transparent;
+}
+.figitem .img{
+  width:100%;
+  background:#fff; border:1px solid var(--line); border-radius:6px;
+  overflow:hidden; box-shadow:0 1px 8px rgba(0,0,0,.05);
+}
+.figitem .img img{ width:100%; height:auto; display:block; }
+.figitem .caption{
+  font-size:16px; color:#555; line-height:1.55;
+  margin-top:8px;
+}
+
+/* 窄屏下改为单列堆叠 */
+@media (max-width:800px){
+  .figure-grid{ grid-template-columns:1fr; }
+}
+</style>
 </head>
 <body>
 
 <div class="detail-wrap">
-  <!-- 左列：标题 + 图表 + 说明 -->
+  <!-- 左列 -->
   <section class="left-col">
     <div class="detail-title">
-      <h2>B</h2> <!-- ← 修改为 A/B/C/D/E 对应标题 -->
+      <h2>B</h2>
     </div>
 
-    <!-- 图表（完整的有 transition + interaction） -->
-    <!-- 将 src 换成对应的图表文件：charts/C.html -->
+    <!-- 图表 -->
     <div class="chart-slab">
-      <iframe class="chart-frame" src="charts/B.html" title="Chart B"></iframe>
+      <iframe class="chart-frame" src="charts/B.html" title="Chart B" scrolling="no"></iframe>
     </div>
 
-    <!-- 说明图片 + 说明文字 -->
-    <div class="figure">
-      <div class="img">
-        <!-- 替换为对应的说明图 -->
-        <img src="figs/B-info.jpg" alt="说明图 B"/>
+    <!-- 并排两张说明图，每张图的说明在其下方 -->
+    <div class="figure-grid">
+      <div class="figitem">
+        <div class="img">
+          <img src="figs/B-info.jpg" alt="说明图 B"/>
+        </div>
+        <div class="caption">
+          <strong>说明图 B：</strong>本图展示方案 B 的核心构型与坐标定位。
+        </div>
       </div>
-      <div class="caption">
-        <strong>说明（B）</strong><br/>
-        这里是该图的简短说明文案。例如：本图展示 α 与 β 基向量之间的组合关系；
-        虚线箭头表示映射方向。鼠标悬停在线上会出现最近点圆点与说明框。
+
+      <div class="figitem">
+        <div class="img">
+          <img src="figs/B1-info.jpg" alt="说明图 B1"/>
+        </div>
+        <div class="caption">
+          <strong>说明图 B1：</strong>补充展示边界条件与关键标注，辅助理解交互细节。
+        </div>
       </div>
     </div>
   </section>
@@ -38,28 +105,31 @@
   <!-- 右列：Notes -->
   <aside class="right-col">
     <div class="notes">
-      <h3>Notes</h3>
+      <div>
+        <h3>Notes</h3>
 
-      <h4>Canvas &amp; Grid</h4>
-      <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
+        <h4>Canvas &amp; Grid</h4>
+        <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
 
-      <h4>Key Points</h4>
-      <ul>
-        <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
-        <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
-      </ul>
+        <h4>Key Points</h4>
+        <ul>
+          <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
+          <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
+        </ul>
 
-      <h4>Animation</h4>
-      <p>Stroke-dash trick draws lines in from start to end.</p>
+        <h4>Animation</h4>
+        <p>Stroke-dash trick draws lines in from start to end.</p>
 
-      <h4>Interaction</h4>
-      <p>A wide invisible hit stroke captures hover; a dot snaps to the closest point on the segment; a tooltip shows label and position.</p>
+        <h4>Interaction</h4>
+        <p>A wide invisible hit stroke captures hover; a dot snaps to the closest point on the segment; a tooltip shows label and position.</p>
 
-      <h4>Design Choices</h4>
-      <ul>
-        <li>Typeface: Times family to match slide style.</li>
-        <li>Grey background for poster-like layout.</li>
-      </ul>
+        <h4>Design Choices</h4>
+        <ul>
+          <li>Typeface: Times family to match slide style.</li>
+          <li>Grey background for poster-like layout.</li>
+        </ul>
+      </div>
+      <div style="height:24px;"></div>
     </div>
   </aside>
 </div>
