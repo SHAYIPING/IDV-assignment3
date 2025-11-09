@@ -1,3 +1,22 @@
+<style>
+  /* 关键：让 SVG 随容器宽度缩放，不溢出；去掉默认边距 */
+  html,body{ margin:0; padding:0; background:#fff; }
+  svg{ width:100%; height:auto; display:block; }
+</style>
+
+<script>
+  // 将页面真实高度发送给父页，使父页 iframe 自适应
+  function sendHeight(){
+    const h = Math.max(
+      document.body.scrollHeight, document.documentElement.scrollHeight,
+      document.body.offsetHeight, document.documentElement.offsetHeight
+    );
+    parent.postMessage({ __chartHeight: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  new ResizeObserver(sendHeight).observe(document.body);
+</script>
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <meta charset="utf-8" />
