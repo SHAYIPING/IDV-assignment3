@@ -6,45 +6,25 @@
 <title>A – Assignment 3</title>
 <link rel="stylesheet" href="styles.css"/>
 <style>
-/* 仅此页微调布局 */
-
-/* 1️⃣ 移除 iframe 滚动条和外框，自动撑满父容器 */
-.chart-slab {
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:8px;
-  box-shadow:0 2px 14px rgba(0,0,0,.07);
-  padding:0;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
+/* 仅此页微调：让 iframe 无滚动条，由脚本自动调高 */
+.chart-slab{
+  background:#fff; border:1px solid var(--line); border-radius:8px;
+  box-shadow:0 2px 14px rgba(0,0,0,.07); padding:0; overflow:hidden;
+  display:flex; flex-direction:column;
 }
-
-.chart-frame {
+.chart-frame{
   width:100%;
-  aspect-ratio:16/9;       /* 自动根据宽度调整高度，完整显示内容 */
-  border:0;
-  display:block;
-  background:#fff;
-  overflow:hidden;
-  scrollbar-width:none;    /* Firefox */
+  border:0; display:block; background:#fff; overflow:hidden;
+  /* 不设固定高度/比例，由脚本根据内部 SVG 实际高度来设 */
+  scrollbar-width:none;
 }
-.chart-frame::-webkit-scrollbar { display:none; } /* Chrome, Edge */
+.chart-frame::-webkit-scrollbar{ display:none; }
 
-/* 2️⃣ 右侧 Notes 底部与左侧 chart 底部对齐 */
-.detail-wrap {
-  align-items:start;
-}
-.left-col, .right-col {
-  display:flex;
-  flex-direction:column;
-}
-.notes {
-  flex-grow:1;               /* 自动填充右侧高度 */
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between; /* 内容撑满高度，使底部对齐 */
-  height:100%;
+.detail-wrap{ align-items:start; }
+.left-col,.right-col{ display:flex; flex-direction:column; }
+.notes{
+  flex-grow:1; display:flex; flex-direction:column;
+  justify-content:space-between; height:100%;
 }
 </style>
 </head>
@@ -53,20 +33,16 @@
 <div class="detail-wrap">
   <!-- 左列 -->
   <section class="left-col">
-    <div class="detail-title">
-      <h2>A</h2>
-    </div>
+    <div class="detail-title"><h2>A</h2></div>
 
     <!-- 图表 -->
     <div class="chart-slab">
-      <iframe class="chart-frame" src="charts/A.html" title="Chart A" scrolling="no"></iframe>
+      <iframe class="chart-frame" id="chartA" src="charts/A.html" title="Chart A" scrolling="no"></iframe>
     </div>
 
-    <!-- 说明图片 + 文案 -->
-    <div class="figure">
-      <div class="img">
-        <img src="figs/A-info.jpg" alt="说明图 A"/>
-      </div>
+    <!-- 说明图片 + 文案（仅一张） -->
+    <div class="figure" style="margin-top:18px;">
+      <div class="img"><img src="figs/A-info.jpg" alt="说明图 A"/></div>
       <div class="caption">
         <strong>说明（A）</strong><br/>
         本图展示 α 与 β 基向量之间的组合关系；虚线箭头表示映射方向。
@@ -82,30 +58,54 @@
         <h3>Notes</h3>
 
         <h4>Canvas &amp; Grid</h4>
-        <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
+        <p>Use <code>&lt;svg&gt;</code> with <code>viewBox</code> for responsive scaling; center the grid via group translation.</p>
 
         <h4>Key Points</h4>
         <ul>
           <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
-          <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
+          <li>Vectors: 4 solid segments + 2 dashed arrows (custom V-shaped markers).</li>
         </ul>
 
         <h4>Animation</h4>
-        <p>Stroke-dash trick draws lines in from start to end.</p>
+        <p>Stroke-dash draw-in for each segment.</p>
 
         <h4>Interaction</h4>
-        <p>A wide invisible hit stroke captures hover; a dot snaps to the closest point on the segment; a tooltip shows label and position.</p>
-
-        <h4>Design Choices</h4>
-        <ul>
-          <li>Typeface: Times family to match slide style.</li>
-          <li>Grey background for poster-like layout.</li>
-        </ul>
+        <p>Invisible wide hit-stroke; show closest point (hover dot) + tooltip.</p>
       </div>
-      <div style="height:24px;"></div> <!-- 让底部与左侧对齐 -->
+      <div style="height:24px;"></div>
     </div>
   </aside>
 </div>
+
+<script>
+/* 接收 charts/A.html 发来的实际内容高度，并设置 iframe 高度 */
+(function(){
+  const frame = document.getElementById('chartA');
+
+  function setH(h){
+    if(!h) return;
+    const H = Math.max(320, Math.min(1200, h)); // 限个合理范围
+    if (Math.abs(frame.clientHeight - H) > 5) frame.style.height = H + 'px';
+  }
+
+  // 读取一次（同源可读时）
+  function resizeByRead(){
+    try{
+      const doc = frame.contentDocument || frame.contentWindow.document;
+      const h = Math.max(
+        doc.body.scrollHeight, doc.documentElement.scrollHeight,
+        doc.body.offsetHeight, doc.documentElement.offsetHeight
+      );
+      setH(h);
+    }catch(e){}
+  }
+
+  frame.addEventListener('load', resizeByRead);
+  window.addEventListener('message', (e)=>{
+    if (e && e.data && e.data.__chartHeight != null) setH(e.data.__chartHeight);
+  });
+})();
+</script>
 
 </body>
 </html>
