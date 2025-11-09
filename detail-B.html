@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>C – Assignment 3</title>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<div class="detail-wrap">
+  <!-- 左列：标题 + 图表 + 说明 -->
+  <section class="left-col">
+    <div class="detail-title">
+      <h2>C</h2> <!-- ← 修改为 A/B/C/D/E 对应标题 -->
+    </div>
+
+    <!-- 图表（完整的有 transition + interaction） -->
+    <!-- 将 src 换成对应的图表文件：charts/C.html -->
+    <div class="chart-slab">
+      <iframe class="chart-frame" src="charts/C.html" title="Chart C"></iframe>
+    </div>
+
+    <!-- 说明图片 + 说明文字 -->
+    <div class="figure">
+      <div class="img">
+        <!-- 替换为对应的说明图 -->
+        <img src="figs/C-info.jpg" alt="说明图 C"/>
+      </div>
+      <div class="caption">
+        <strong>说明（C）</strong><br/>
+        这里是该图的简短说明文案。例如：本图展示 α 与 β 基向量之间的组合关系；
+        虚线箭头表示映射方向。鼠标悬停在线上会出现最近点圆点与说明框。
+      </div>
+    </div>
+  </section>
+
+  <!-- 右列：Notes -->
+  <aside class="right-col">
+    <div class="notes">
+      <h3>Notes</h3>
+
+      <h4>Canvas &amp; Grid</h4>
+      <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
+
+      <h4>Key Points</h4>
+      <ul>
+        <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
+        <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
+      </ul>
+
+      <h4>Animation</h4>
+      <p>Stroke-dash trick draws lines in from start to end.</p>
+
+      <h4>Interaction</h4>
+      <p>A wide invisible hit stroke captures hover; a dot snaps to the closest point on the segment; a tooltip shows label and position.</p>
+
+      <h4>Design Choices</h4>
+      <ul>
+        <li>Typeface: Times family to match slide style.</li>
+        <li>Grey background for poster-like layout.</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+</body>
+</html>
