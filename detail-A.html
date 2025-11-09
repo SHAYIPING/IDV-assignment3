@@ -3,34 +3,74 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>C – Assignment 3</title>
+<title>A – Assignment 3</title>
 <link rel="stylesheet" href="styles.css"/>
+<style>
+/* 仅此页微调布局 */
+
+/* 1️⃣ 移除 iframe 滚动条和外框，自动撑满父容器 */
+.chart-slab {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:8px;
+  box-shadow:0 2px 14px rgba(0,0,0,.07);
+  padding:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.chart-frame {
+  width:100%;
+  aspect-ratio:16/9;       /* 自动根据宽度调整高度，完整显示内容 */
+  border:0;
+  display:block;
+  background:#fff;
+  overflow:hidden;
+  scrollbar-width:none;    /* Firefox */
+}
+.chart-frame::-webkit-scrollbar { display:none; } /* Chrome, Edge */
+
+/* 2️⃣ 右侧 Notes 底部与左侧 chart 底部对齐 */
+.detail-wrap {
+  align-items:start;
+}
+.left-col, .right-col {
+  display:flex;
+  flex-direction:column;
+}
+.notes {
+  flex-grow:1;               /* 自动填充右侧高度 */
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between; /* 内容撑满高度，使底部对齐 */
+  height:100%;
+}
+</style>
 </head>
 <body>
 
 <div class="detail-wrap">
-  <!-- 左列：标题 + 图表 + 说明 -->
+  <!-- 左列 -->
   <section class="left-col">
     <div class="detail-title">
-      <h2>A</h2> <!-- ← 修改为 A/B/C/D/E 对应标题 -->
+      <h2>A</h2>
     </div>
 
-    <!-- 图表（完整的有 transition + interaction） -->
-    <!-- 将 src 换成对应的图表文件：charts/C.html -->
+    <!-- 图表 -->
     <div class="chart-slab">
-      <iframe class="chart-frame" src="charts/A.html" title="Chart A"></iframe>
+      <iframe class="chart-frame" src="charts/A.html" title="Chart A" scrolling="no"></iframe>
     </div>
 
-    <!-- 说明图片 + 说明文字 -->
+    <!-- 说明图片 + 文案 -->
     <div class="figure">
       <div class="img">
-        <!-- 替换为对应的说明图 -->
         <img src="figs/A-info.jpg" alt="说明图 A"/>
       </div>
       <div class="caption">
-        <strong>说明（C）</strong><br/>
-        这里是该图的简短说明文案。例如：本图展示 α 与 β 基向量之间的组合关系；
-        虚线箭头表示映射方向。鼠标悬停在线上会出现最近点圆点与说明框。
+        <strong>说明（A）</strong><br/>
+        本图展示 α 与 β 基向量之间的组合关系；虚线箭头表示映射方向。
+        鼠标悬停在线上会出现最近点圆点与说明框。
       </div>
     </div>
   </section>
@@ -38,28 +78,31 @@
   <!-- 右列：Notes -->
   <aside class="right-col">
     <div class="notes">
-      <h3>Notes</h3>
+      <div>
+        <h3>Notes</h3>
 
-      <h4>Canvas &amp; Grid</h4>
-      <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
+        <h4>Canvas &amp; Grid</h4>
+        <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
 
-      <h4>Key Points</h4>
-      <ul>
-        <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
-        <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
-      </ul>
+        <h4>Key Points</h4>
+        <ul>
+          <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
+          <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
+        </ul>
 
-      <h4>Animation</h4>
-      <p>Stroke-dash trick draws lines in from start to end.</p>
+        <h4>Animation</h4>
+        <p>Stroke-dash trick draws lines in from start to end.</p>
 
-      <h4>Interaction</h4>
-      <p>A wide invisible hit stroke captures hover; a dot snaps to the closest point on the segment; a tooltip shows label and position.</p>
+        <h4>Interaction</h4>
+        <p>A wide invisible hit stroke captures hover; a dot snaps to the closest point on the segment; a tooltip shows label and position.</p>
 
-      <h4>Design Choices</h4>
-      <ul>
-        <li>Typeface: Times family to match slide style.</li>
-        <li>Grey background for poster-like layout.</li>
-      </ul>
+        <h4>Design Choices</h4>
+        <ul>
+          <li>Typeface: Times family to match slide style.</li>
+          <li>Grey background for poster-like layout.</li>
+        </ul>
+      </div>
+      <div style="height:24px;"></div> <!-- 让底部与左侧对齐 -->
     </div>
   </aside>
 </div>
