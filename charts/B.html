@@ -1,28 +1,15 @@
-<style>
-  /* 关键：让 SVG 随容器宽度缩放，不溢出；去掉默认边距 */
-  html,body{ margin:0; padding:0; background:#fff; }
-  svg{ width:100%; height:auto; display:block; }
-</style>
-
-<script>
-  // 将页面真实高度发送给父页，使父页 iframe 自适应
-  function sendHeight(){
-    const h = Math.max(
-      document.body.scrollHeight, document.documentElement.scrollHeight,
-      document.body.offsetHeight, document.documentElement.offsetHeight
-    );
-    parent.postMessage({ __chartHeight: h }, '*');
-  }
-  window.addEventListener('load', sendHeight);
-  new ResizeObserver(sendHeight).observe(document.body);
-</script>
-
 <!DOCTYPE html>
 <html lang="zh-CN">
+<head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Chart Replication — pixel-placed (smooth logic transitions)</title>
+<title>Chart B — responsive + correct hover</title>
+
 <style>
+  /* 让 SVG 自适应，且不溢出 */
+  html,body{ margin:0; padding:0; background:#fff; font-family:"Times New Roman",Times,serif; }
+  svg{ width:100%; height:auto; display:block; margin:8px auto; background:#fff }
+
   :root{
     --axis:#000;
     --purple:#5f42a6;
@@ -30,9 +17,6 @@
     --green:#3a8b3a;
     --green-dash:rgba(58,139,58,.20);
   }
-  html,body{margin:0;background:#fff;font-family:"Times New Roman",Times,serif;}
-  svg{display:block;margin:8px auto;background:#fff}
-
   .axis{stroke:var(--axis);stroke-width:4;fill:none;shape-rendering:crispEdges}
   .tick{stroke:var(--axis);stroke-width:4}
   .label{fill:#000;font-size:24px}
@@ -48,65 +32,46 @@
     stroke:var(--purple);stroke-width:2.6;fill:none;
     marker-end:url(#chevTri);
     transform:translateX(-20px);
-    opacity:0;
-    animation:arrowIn 1.2s ease forwards;
+    opacity:0; animation:arrowIn 1.2s ease forwards;
   }
-  @keyframes arrowIn{
-    0%{transform:translateX(-20px);opacity:0;}
-    100%{transform:translateX(0);opacity:1;}
-  }
+  @keyframes arrowIn{0%{transform:translateX(-20px);opacity:0;}100%{transform:translateX(0);opacity:1;}}
 
-  .curve{
-    fill:none;stroke:var(--green);stroke-width:3.2;
-    opacity:0;animation:fadeIn 1s ease forwards .3s;
-  }
-  .curveDash{
-    fill:none;stroke:var(--green-dash);stroke-width:3.2;stroke-dasharray:8 7;
-    opacity:0;animation:fadeIn 1s ease forwards .6s;
-  }
-  @keyframes fadeIn{
-    to{opacity:1;}
-  }
+  .curve{ fill:none; stroke:var(--green); stroke-width:3.2; opacity:0; animation:fadeIn 1s ease forwards .3s; }
+  .curveDash{ fill:none; stroke:var(--green-dash); stroke-width:3.2; stroke-dasharray:8 7; opacity:0; animation:fadeIn 1s ease forwards .6s; }
+  @keyframes fadeIn{ to{opacity:1;} }
 
   .tooltip{
-    position:fixed;pointer-events:none;padding:6px 8px;border:1px solid #e5e7eb;
-    background:#fff;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.06);
-    font:12px/1.4 monospace;opacity:0;transition:opacity .12s ease;
+    position:fixed; pointer-events:none; padding:6px 8px; border:1px solid #e5e7eb;
+    background:#fff; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,.06);
+    font:12px/1.4 monospace; opacity:0; transition:opacity .12s ease;
   }
 </style>
-
+</head>
 <body>
+
 <div id="tip" class="tooltip"></div>
 
 <svg id="fig" width="1048" height="418" viewBox="0 0 1048 418" aria-label="replicated chart from measured pixels">
   <defs>
-    <marker id="triHead" viewBox="0 0 10 10" refX="6.5" refY="5"
-            markerWidth="8" markerHeight="8" orient="auto">
+    <marker id="triHead" viewBox="0 0 10 10" refX="6.5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M0,1 L0,9 L8,5 Z" fill="#000"/>
     </marker>
-    <marker id="chevTri" viewBox="0 0 10 10" refX="7.5" refY="5"
-            markerWidth="8" markerHeight="8" orient="auto">
+    <marker id="chevTri" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M0,1 L0,9 L9,5 Z" fill="#5f42a6"/>
     </marker>
   </defs>
 
-  <!-- ============ 左侧子图 ============ -->
+  <!-- 左侧子图 -->
   <path class="axis" d="M165 397 L165 29" marker-end="url(#triHead)"/>
   <path class="axis" d="M164 338 L481 338" marker-end="url(#triHead)"/>
 
   <line class="tick" x1="156" y1="194" x2="176" y2="194"/>
   <line class="tick" x1="156" y1="338" x2="176" y2="338"/>
 
-  <text class="label" x="31"  y="200">
-    (High) <tspan class="italic">p</tspan><tspan class="sub">2</tspan>
-  </text>
-  <text class="label" x="37"  y="324">
-    (Low) <tspan class="italic">p</tspan><tspan class="sub">1</tspan>
-  </text>
+  <text class="label" x="31"  y="200">(High) <tspan class="italic">p</tspan><tspan class="sub">2</tspan></text>
+  <text class="label" x="37"  y="324">(Low) <tspan class="italic">p</tspan><tspan class="sub">1</tspan></text>
 
-  <text class="label" x="210" y="397" text-anchor="middle">
-    <tspan class="italic">i</tspan> / <tspan class="italic">n</tspan>
-  </text>
+  <text class="label" x="210" y="397" text-anchor="middle"><tspan class="italic">i</tspan> / <tspan class="italic">n</tspan></text>
   <text class="label" x="330" y="397" text-anchor="middle">
     ( <tspan class="italic">i</tspan> + Δ<tspan class="italic">n</tspan> ) / <tspan class="italic">n</tspan>
   </text>
@@ -131,7 +96,7 @@
 
   <path id="shortArrow" class="chevTri" d="M292 256 L330 256"/>
 
-  <!-- ============ 右侧子图 ============ -->
+  <!-- 右侧子图 -->
   <path class="axis" d="M646 331 L1013 331"/>
   <path class="axis" d="M630 317 L630 36"/>
 
@@ -154,21 +119,25 @@
   <path id="solid" class="curve"/>
   <path id="dashed" class="curveDash"/>
 
+  <!-- 捕获鼠标的透明层 -->
   <rect id="hoverArea" x="630" y="36" width="383" height="295" fill="transparent" pointer-events="all"></rect>
   <circle id="hoverDot" r="4" fill="#3a8b3a" stroke="#fff" stroke-width="2" opacity="0"></circle>
 </svg>
 
+<div id="tip" class="tooltip"></div>
+
 <script>
+/* 曲线生成 */
 function catmullRomPath(points){
-  if(points.length<2)return'';
+  if(points.length<2) return '';
   const p=points.map(pt=>({x:pt[0],y:pt[1]}));
   let d=`M ${p[0].x} ${p[0].y}`;
   for(let i=0;i<p.length-1;i++){
-    const p0=p[i-1]||{x:p[i].x-(p[i+1].x-p[i].x),y:p[i].y-(p[i+1].y-p[i].y)};
-    const p1=p[i];const p2=p[i+1];
-    const p3=p[i+2]||{x:p[i+1].x+(p[i+1].x-p[i].x),y:p[i+1].y+(p[i+1].y-p[i].y)};
-    const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6;
-    const c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;
+    const p0=p[i-1]||{x:p[i].x-(p[i+1].x-p[i].x), y:p[i].y-(p[i+1].y-p[i].y)};
+    const p1=p[i], p2=p[i+1];
+    const p3=p[i+2]||{x:p[i+1].x+(p[i+1].x-p[i].x), y:p[i+1].y+(p[i+1].y-p[i].y)};
+    const c1x=p1.x+(p2.x-p0.x)/6, c1y=p1.y+(p2.y-p0.y)/6;
+    const c2x=p2.x-(p3.x-p1.x)/6, c2y=p2.y-(p3.y-p1.y)/6;
     d+=` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
   }
   return d;
@@ -178,40 +147,67 @@ const ptsDashed=[[684,35],[754,36],[836,42],[893,57],[946,83]];
 document.getElementById('solid').setAttribute('d',catmullRomPath(ptsSolid));
 document.getElementById('dashed').setAttribute('d',catmullRomPath(ptsDashed));
 
-/* --- 右图交互 --- */
-const tip=document.getElementById('tip');
-const hoverArea=document.getElementById('hoverArea');
-const hoverDot=document.getElementById('hoverDot');
-const solid=document.getElementById('solid');
+/* ========== 关键修复：把鼠标的屏幕坐标转换为 SVG 坐标 ========== */
+const svg = document.getElementById('fig');
+function mouseToSVG(evt){
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX;
+  pt.y = evt.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse()); // 得到 viewBox 坐标
+}
+
+/* 右图交互 */
+const tip    = document.getElementById('tip');
+const hoverArea = document.getElementById('hoverArea');
+const hoverDot  = document.getElementById('hoverDot');
+const solid     = document.getElementById('solid');
+
 function findPointOnPathByX(pathEl,targetX){
-  const total=pathEl.getTotalLength();let lo=0,hi=total,best=pathEl.getPointAtLength(0);
-  for(let i=0;i<20;i++){const mid=(lo+hi)/2;const p=pathEl.getPointAtLength(mid);
-    best=p;if(p.x<targetX)lo=mid;else hi=mid;}
+  const total = pathEl.getTotalLength();
+  let lo=0, hi=total, best=pathEl.getPointAtLength(0);
+  for(let i=0;i<20;i++){
+    const mid=(lo+hi)/2, p=pathEl.getPointAtLength(mid);
+    best=p; if(p.x<targetX) lo=mid; else hi=mid;
+  }
   return best;
 }
-const x0=646,x1=1013,y0=317,y40=89;
-function toAxisX(px){return(px-x0)/(x1-x0);}
-function toAxisY(py){return(y0-py)*(40/(y0-y40));}
 
-hoverArea.addEventListener('mousemove',e=>{
-  const rect=hoverArea.ownerSVGElement.getBoundingClientRect();
-  const x=e.clientX-rect.left;
-  const p=findPointOnPathByX(solid,x);
-  hoverDot.setAttribute('cx',p.x);
-  hoverDot.setAttribute('cy',p.y);
-  hoverDot.setAttribute('opacity',1);
-  tip.style.opacity=1;
-  tip.style.left=(e.clientX+12)+'px';
-  tip.style.top=(e.clientY+10)+'px';
-  const ax=Math.max(0,Math.min(1,toAxisX(p.x)));
-  const ay=Math.max(0,Math.min(40,toAxisY(p.y)));
-  tip.textContent=`x=${ax.toFixed(2)}, y=${ay.toFixed(1)}`;
+const x0=646, x1=1013, y0=317, y40=89;
+function toAxisX(px){ return (px-x0)/(x1-x0); }
+function toAxisY(py){ return (y0-py)*(40/(y0-y40)); }
+
+hoverArea.addEventListener('mousemove', e=>{
+  const svgPt = mouseToSVG(e);         // ← 用 SVG 坐标
+  const p = findPointOnPathByX(solid, svgPt.x);
+
+  hoverDot.setAttribute('cx', p.x);
+  hoverDot.setAttribute('cy', p.y);
+  hoverDot.setAttribute('opacity', 1);
+
+  tip.style.opacity = 1;
+  tip.style.left = (e.clientX + 12) + 'px';
+  tip.style.top  = (e.clientY + 10) + 'px';
+
+  const ax = Math.max(0, Math.min(1,  toAxisX(p.x)));
+  const ay = Math.max(0, Math.min(40, toAxisY(p.y)));
+  tip.textContent = `x=${ax.toFixed(2)}, y=${ay.toFixed(1)}`;
 });
-hoverArea.addEventListener('mouseleave',()=>{
+
+hoverArea.addEventListener('mouseleave', ()=>{
   hoverDot.setAttribute('opacity',0);
   tip.style.opacity=0;
 });
+
+/* 通知父页高度，父页据此自适应 iframe */
+function sendHeight(){
+  const h = Math.max(
+    document.body.scrollHeight, document.documentElement.scrollHeight,
+    document.body.offsetHeight, document.documentElement.offsetHeight
+  );
+  parent.postMessage({ __chartHeight: h }, '*');
+}
+window.addEventListener('load', sendHeight);
+new ResizeObserver(sendHeight).observe(document.body);
 </script>
 </body>
 </html>
-
