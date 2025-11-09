@@ -6,7 +6,6 @@
   --line:#d8d8d8;
 
   /* 统一 chart 的可视高度（详情页左侧） */
-  /* 在大屏保持 560px；在中小屏随容器宽度缩放，但不低于 320px */
   --chartH: clamp(320px, 55vw, 560px);
 }
 
@@ -20,26 +19,43 @@ body{
 
 /* ---------- 首页 ---------- */
 .header{
-  max-width:1400px; margin:36px auto 12px; padding:0 24px;
+  max-width:1400px;
+  margin:36px auto 12px;
+  padding:0 24px;
 }
 .header h1{
-  font-size:64px; font-weight:600; margin:0 0 8px;
+  font-size:64px;
+  font-weight:600;
+  margin:0 0 8px;
 }
-.header .meta{ font-size:20px; line-height:1.3; color:var(--ink) }
+.header .meta{
+  font-size:20px;
+  line-height:1.3;
+  color:var(--ink);
+}
 
 /* 五等分网格，所有卡片同尺寸 */
+/* 修改：整体下移 + 调整间距 */
 .gallery{
-  max-width:1400px; margin:24px auto 64px; padding:0 24px;
-  display:grid; grid-template-columns:repeat(5, 1fr);
-  gap:36px; align-items:start;
+  max-width:1400px;
+  margin:80px auto 80px;     /* 原24px → 80px，下移更明显 */
+  padding:0 24px;
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:48px;                  /* 卡片间距稍大 */
+  align-items:start;
 }
+
 .card{
   width:auto;
-  display:flex; flex-direction:column; align-items:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
   text-align:center;
 }
 
-/* 统一的缩略图比例与外观 */
+/* 缩略图外观统一 */
+/* 修改：让图片完整显示（object-fit:contain），不会被裁切 */
 .thumb{
   width:100%;
   aspect-ratio:4/3;
@@ -48,62 +64,100 @@ body{
   box-shadow:0 2px 12px rgba(0,0,0,.06);
   transform:translateZ(0);
   transition:transform .18s ease, box-shadow .18s ease;
-  border-radius:8px; overflow:hidden;
+  border-radius:8px;
+  overflow:hidden;
 }
-.thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:contain;     /* 原为 cover，改为 contain 以完整显示 */
+  object-position:center; /* 居中显示 */
+  display:block;
+  background:#fff;        /* 防止透明图出现灰底 */
+}
 
 /* 悬停放大更明显 */
 .card:hover .thumb{
-  transform:scale(1.12);              /* 原 1.06 → 1.12 */
+  transform:scale(1.12);
   box-shadow:0 16px 36px rgba(0,0,0,.22);
 }
 .card .label{
-  margin-top:14px; font-size:22px; letter-spacing:.12em;
+  margin-top:14px;
+  font-size:22px;
+  letter-spacing:.12em;
 }
 
 /* ---------- 详情页 ---------- */
 .detail-wrap{
-  max-width:1400px; margin:36px auto; padding:0 24px;
-  display:grid; grid-template-columns: 1.2fr .8fr; gap:40px;
+  max-width:1400px;
+  margin:36px auto;
+  padding:0 24px;
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:40px;
 }
 .detail-title{
-  position:sticky; top:24px; margin-bottom:8px;
+  position:sticky;
+  top:24px;
+  margin-bottom:8px;
 }
-.detail-title h2{ font-size:48px; margin:0 0 20px; font-weight:600 }
+.detail-title h2{
+  font-size:48px;
+  margin:0 0 20px;
+  font-weight:600;
+}
 
 .left-col{ }
 .chart-slab{
-  background:#fff; border:1px solid var(--line); border-radius:8px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:8px;
   box-shadow:0 2px 14px rgba(0,0,0,.07);
-  padding:0; overflow:hidden;
+  padding:0;
+  overflow:hidden;
 }
 
-/* 统一 chart 可视尺寸：全宽 + 固定响应式高度；去掉内部滚动条 */
+/* 统一 chart 可视尺寸 */
 .chart-frame{
   width:100%;
   height:var(--chartH);
-  border:0; display:block; background:#fff;
-  /* 某些浏览器下隐藏 iframe 内部滚动条（尽量避免出现） */
+  border:0;
+  display:block;
+  background:#fff;
   scrollbar-width:none;
 }
 
 /* 图注区 */
 .figure{
-  display:flex; gap:18px; align-items:flex-start; margin-top:18px;
+  display:flex;
+  gap:18px;
+  align-items:flex-start;
+  margin-top:18px;
 }
 .figure .img{
-  width:360px; background:#fff; border:1px solid var(--line); border-radius:6px;
-  overflow:hidden; box-shadow:0 1px 8px rgba(0,0,0,.05);
+  width:360px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:0 1px 8px rgba(0,0,0,.05);
 }
 .figure .img img{ width:100%; height:auto; display:block; }
 .figure .caption{
-  flex:1; font-size:18px; color:var(--muted); line-height:1.6;
-  background:transparent; padding-top:6px; border-top:0;
+  flex:1;
+  font-size:18px;
+  color:var(--muted);
+  line-height:1.6;
+  background:transparent;
+  padding-top:6px;
+  border-top:0;
 }
 
 .right-col{ background:transparent; }
 .notes{
-  background:#fff; border:1px solid var(--line); border-radius:8px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:8px;
   box-shadow:0 2px 14px rgba(0,0,0,.07);
   padding:22px;
 }
@@ -114,12 +168,12 @@ body{
 
 /* 响应式：窄屏单列 */
 @media (max-width:1000px){
-  .gallery{ grid-template-columns:1fr 1fr; gap:20px } /* 手机上两列展示 */
+  .gallery{ grid-template-columns:1fr 1fr; gap:20px }
   .detail-wrap{ grid-template-columns:1fr; }
   .detail-title h2{ font-size:40px }
   .figure{ flex-direction:column }
   .figure .img{ width:100% }
 }
 @media (max-width:560px){
-  .gallery{ grid-template-columns:1fr } /* 超窄屏单列 */
+  .gallery{ grid-template-columns:1fr }
 }
