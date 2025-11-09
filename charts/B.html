@@ -1,1 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chart Replication — pixel-placed (smooth logic transitions)</title>
+<style>
+  :root{
+    --axis:#000;
+    --purple:#5f42a6;
+    --purple-fill:rgba(95,66,166,.28);
+    --green:#3a8b3a;
+    --green-dash:rgba(58,139,58,.20);
+  }
+  html,body{margin:0;background:#fff;font-family:"Times New Roman",Times,serif;}
+  svg{display:block;margin:8px auto;background:#fff}
+
+  .axis{stroke:var(--axis);stroke-width:4;fill:none;shape-rendering:crispEdges}
+  .tick{stroke:var(--axis);stroke-width:4}
+  .label{fill:#000;font-size:24px}
+  .italic{font-style:italic}
+  .sub{baseline-shift:sub;font-size:0.75em}
+
+  .barDashSide{stroke:var(--purple);stroke-width:2.6;stroke-dasharray:6 5;fill:none}
+  .barTopDash{stroke:var(--purple);stroke-width:2.6;stroke-dasharray:6 5}
+  .barFillRect{fill:var(--purple-fill)}
+  .baselineDots{stroke:var(--purple);stroke-width:2;stroke-dasharray:1 5}
+
+  .chevTri{
+    stroke:var(--purple);stroke-width:2.6;fill:none;
+    marker-end:url(#chevTri);
+    transform:translateX(-20px);
+    opacity:0;
+    animation:arrowIn 1.2s ease forwards;
+  }
+  @keyframes arrowIn{
+    0%{transform:translateX(-20px);opacity:0;}
+    100%{transform:translateX(0);opacity:1;}
+  }
+
+  .curve{
+    fill:none;stroke:var(--green);stroke-width:3.2;
+    opacity:0;animation:fadeIn 1s ease forwards .3s;
+  }
+  .curveDash{
+    fill:none;stroke:var(--green-dash);stroke-width:3.2;stroke-dasharray:8 7;
+    opacity:0;animation:fadeIn 1s ease forwards .6s;
+  }
+  @keyframes fadeIn{
+    to{opacity:1;}
+  }
+
+  .tooltip{
+    position:fixed;pointer-events:none;padding:6px 8px;border:1px solid #e5e7eb;
+    background:#fff;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.06);
+    font:12px/1.4 monospace;opacity:0;transition:opacity .12s ease;
+  }
+</style>
+
+<body>
+<div id="tip" class="tooltip"></div>
+
+<svg id="fig" width="1048" height="418" viewBox="0 0 1048 418" aria-label="replicated chart from measured pixels">
+  <defs>
+    <marker id="triHead" viewBox="0 0 10 10" refX="6.5" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,1 L0,9 L8,5 Z" fill="#000"/>
+    </marker>
+    <marker id="chevTri" viewBox="0 0 10 10" refX="7.5" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,1 L0,9 L9,5 Z" fill="#5f42a6"/>
+    </marker>
+  </defs>
+
+  <!-- ============ 左侧子图 ============ -->
+  <path class="axis" d="M165 397 L165 29" marker-end="url(#triHead)"/>
+  <path class="axis" d="M164 338 L481 338" marker-end="url(#triHead)"/>
+
+  <line class="tick" x1="156" y1="194" x2="176" y2="194"/>
+  <line class="tick" x1="156" y1="338" x2="176" y2="338"/>
+
+  <text class="label" x="31"  y="200">
+    (High) <tspan class="italic">p</tspan><tspan class="sub">2</tspan>
+  </text>
+  <text class="label" x="37"  y="324">
+    (Low) <tspan class="italic">p</tspan><tspan class="sub">1</tspan>
+  </text>
+
+  <text class="label" x="210" y="397" text-anchor="middle">
+    <tspan class="italic">i</tspan> / <tspan class="italic">n</tspan>
+  </text>
+  <text class="label" x="330" y="397" text-anchor="middle">
+    ( <tspan class="italic">i</tspan> + Δ<tspan class="italic">n</tspan> ) / <tspan class="italic">n</tspan>
+  </text>
+  <text class="label" x="487" y="397" text-anchor="middle">1</text>
+
+  <rect x="165" y="320" width="315" height="18" class="barFillRect"/>
+  <line class="baselineDots" x1="165" y1="320" x2="480" y2="320"/>
+
+  <line class="tick" x1="198" y1="338" x2="198" y2="350"/>
+  <line class="tick" x1="260" y1="338" x2="260" y2="350"/>
+
+  <rect x="195" y="194" width="65" height="126" class="barFillRect"/>
+  <line class="barTopDash"  x1="195" y1="194" x2="260" y2="194"/>
+  <line class="barDashSide" x1="195" y1="194" x2="195" y2="320"/>
+  <line class="barDashSide" x1="260" y1="194" x2="260" y2="320"/>
+  <line class="baselineDots" x1="195" y1="320" x2="260" y2="320"/>
+
+  <line class="barTopDash"  x1="361" y1="194" x2="424" y2="194"/>
+  <line class="barDashSide" x1="361" y1="194" x2="361" y2="320"/>
+  <line class="barDashSide" x1="424" y1="194" x2="424" y2="320"/>
+  <line class="baselineDots" x1="361" y1="320" x2="424" y2="320"/>
+
+  <path id="shortArrow" class="chevTri" d="M292 256 L330 256"/>
+
+  <!-- ============ 右侧子图 ============ -->
+  <path class="axis" d="M646 331 L1013 331"/>
+  <path class="axis" d="M630 317 L630 36"/>
+
+  <line class="tick" x1="630" y1="89"  x2="614" y2="89"/>
+  <line class="tick" x1="630" y1="203" x2="614" y2="203"/>
+  <line class="tick" x1="630" y1="317" x2="614" y2="317"/>
+  <text class="label" x="606" y="95"  text-anchor="end" font-size="20">40</text>
+  <text class="label" x="606" y="209" text-anchor="end" font-size="20">20</text>
+  <text class="label" x="606" y="323" text-anchor="end" font-size="20">0</text>
+
+  <line class="tick" x1="646" y1="331" x2="646" y2="347"/>
+  <line class="tick" x1="813" y1="331" x2="813" y2="347"/>
+  <line class="tick" x1="980" y1="331" x2="980" y2="347"/>
+  <text class="label" x="646" y="366" text-anchor="middle" font-size="20">0</text>
+  <text class="label" x="813" y="366" text-anchor="middle" font-size="20">0.5</text>
+  <text class="label" x="980" y="366" text-anchor="middle" font-size="20">1</text>
+
+  <text class="label" x="880" y="310" text-anchor="start" font-size="22">position</text>
+
+  <path id="solid" class="curve"/>
+  <path id="dashed" class="curveDash"/>
+
+  <rect id="hoverArea" x="630" y="36" width="383" height="295" fill="transparent" pointer-events="all"></rect>
+  <circle id="hoverDot" r="4" fill="#3a8b3a" stroke="#fff" stroke-width="2" opacity="0"></circle>
+</svg>
+
+<script>
+function catmullRomPath(points){
+  if(points.length<2)return'';
+  const p=points.map(pt=>({x:pt[0],y:pt[1]}));
+  let d=`M ${p[0].x} ${p[0].y}`;
+  for(let i=0;i<p.length-1;i++){
+    const p0=p[i-1]||{x:p[i].x-(p[i+1].x-p[i].x),y:p[i].y-(p[i+1].y-p[i].y)};
+    const p1=p[i];const p2=p[i+1];
+    const p3=p[i+2]||{x:p[i+1].x+(p[i+1].x-p[i].x),y:p[i+1].y+(p[i+1].y-p[i].y)};
+    const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6;
+    const c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;
+    d+=` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+const ptsSolid=[[682,116],[751,115],[831,121],[887,139],[945,170]];
+const ptsDashed=[[684,35],[754,36],[836,42],[893,57],[946,83]];
+document.getElementById('solid').setAttribute('d',catmullRomPath(ptsSolid));
+document.getElementById('dashed').setAttribute('d',catmullRomPath(ptsDashed));
+
+/* --- 右图交互 --- */
+const tip=document.getElementById('tip');
+const hoverArea=document.getElementById('hoverArea');
+const hoverDot=document.getElementById('hoverDot');
+const solid=document.getElementById('solid');
+function findPointOnPathByX(pathEl,targetX){
+  const total=pathEl.getTotalLength();let lo=0,hi=total,best=pathEl.getPointAtLength(0);
+  for(let i=0;i<20;i++){const mid=(lo+hi)/2;const p=pathEl.getPointAtLength(mid);
+    best=p;if(p.x<targetX)lo=mid;else hi=mid;}
+  return best;
+}
+const x0=646,x1=1013,y0=317,y40=89;
+function toAxisX(px){return(px-x0)/(x1-x0);}
+function toAxisY(py){return(y0-py)*(40/(y0-y40));}
+
+hoverArea.addEventListener('mousemove',e=>{
+  const rect=hoverArea.ownerSVGElement.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  const p=findPointOnPathByX(solid,x);
+  hoverDot.setAttribute('cx',p.x);
+  hoverDot.setAttribute('cy',p.y);
+  hoverDot.setAttribute('opacity',1);
+  tip.style.opacity=1;
+  tip.style.left=(e.clientX+12)+'px';
+  tip.style.top=(e.clientY+10)+'px';
+  const ax=Math.max(0,Math.min(1,toAxisX(p.x)));
+  const ay=Math.max(0,Math.min(40,toAxisY(p.y)));
+  tip.textContent=`x=${ax.toFixed(2)}, y=${ay.toFixed(1)}`;
+});
+hoverArea.addEventListener('mouseleave',()=>{
+  hoverDot.setAttribute('opacity',0);
+  tip.style.opacity=0;
+});
+</script>
+</body>
+</html>
 
