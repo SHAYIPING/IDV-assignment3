@@ -33,15 +33,15 @@
 
   /* 交互高亮层（7个区域同一风格） */
   .region{
-    fill:#ffffff;                 /* 用白色提亮，不改变原色体系 */
-    fill-opacity:0;               /* 默认看不见，仅用于 hover 高亮 */
+    fill:#ffffff;
+    fill-opacity:0;
     stroke:#111; stroke-opacity:0;
     transition:fill-opacity .18s ease, stroke-opacity .18s ease;
-    pointer-events:all;           /* 区域可响应鼠标事件 */
+    pointer-events:all;
   }
   .region:hover{
-    fill-opacity:.35;             /* 悬停时提亮 */
-    stroke-opacity:.65;           /* 并给一条细描边 */
+    fill-opacity:.35;
+    stroke-opacity:.65;
   }
 </style>
 
@@ -63,9 +63,7 @@
     <!-- mask：仅 A 的“排他区域”（A \ (B ∪ C)) -->
     <mask id="maskOnlyReplace" maskUnits="userSpaceOnUse">
       <rect width="1200" height="800" fill="black"/>
-      <!-- 保留 Replace -->
       <use href="#cReplace" fill="white"/>
-      <!-- 把 Replace∩Delete 和 Replace∩Rewrite 置黑剔除 -->
       <g clip-path="url(#clipReplace)"><use href="#cDelete"  fill="black"/></g>
       <g clip-path="url(#clipReplace)"><use href="#cRewrite" fill="black"/></g>
     </mask>
@@ -85,83 +83,76 @@
     </mask>
   </defs>
 
-  <!-- ====== 视觉层（带整体淡入） ====== -->
-  <g class="fade" id="layer-visual">
-    <!-- 1) 三个主圆（单独区域较深） -->
-    <use href="#cReplace" fill="#bca8ab" fill-opacity=".75"/>
-    <use href="#cDelete"  fill="#cfc7e6" fill-opacity=".75"/>
-    <use href="#cRewrite" fill="#ead27a" fill-opacity=".75"/>
+  <!-- ⭐ 将三个可视层整体右移 60px -->
+  <g transform="translate(60,0)">
 
-    <!-- 2) 两两交集（IV、V、VI 提亮） -->
-    <!-- IV = Replace ∩ Delete -->
-    <g clip-path="url(#clipReplace)">
-      <use href="#cDelete" fill="#e9e3ec" fill-opacity=".90"/>
-    </g>
-    <!-- V = Replace ∩ Rewrite -->
-    <g clip-path="url(#clipReplace)">
-      <use href="#cRewrite" fill="#f6edbf" fill-opacity=".90"/>
-    </g>
-    <!-- VI = Delete ∩ Rewrite -->
-    <g clip-path="url(#clipDelete)">
-      <use href="#cRewrite" fill="#eee9f8" fill-opacity=".90"/>
-    </g>
+    <!-- ====== 视觉层（带整体淡入） ====== -->
+    <g class="fade" id="layer-visual">
+      <use href="#cReplace" fill="#bca8ab" fill-opacity=".75"/>
+      <use href="#cDelete"  fill="#cfc7e6" fill-opacity=".75"/>
+      <use href="#cRewrite" fill="#ead27a" fill-opacity=".75"/>
 
-    <!-- 3) 三重交集 VII = Replace ∩ Delete ∩ Rewrite（最亮） -->
-    <g clip-path="url(#clipReplace)">
+      <!-- 两两交集 -->
+      <g clip-path="url(#clipReplace)">
+        <use href="#cDelete" fill="#e9e3ec" fill-opacity=".90"/>
+      </g>
+      <g clip-path="url(#clipReplace)">
+        <use href="#cRewrite" fill="#f6edbf" fill-opacity=".90"/>
+      </g>
       <g clip-path="url(#clipDelete)">
-        <use href="#cRewrite" fill="#f9f8f0" fill-opacity=".98"/>
+        <use href="#cRewrite" fill="#eee9f8" fill-opacity=".90"/>
+      </g>
+
+      <!-- 三重交集 -->
+      <g clip-path="url(#clipReplace)">
+        <g clip-path="url(#clipDelete)">
+          <use href="#cRewrite" fill="#f9f8f0" fill-opacity=".98"/>
+        </g>
       </g>
     </g>
-  </g>
 
-  <!-- ====== 交互高亮层（7 个区域，默认透明，hover 显示） ====== -->
-  <g class="fade" id="layer-interactive">
-    <!-- I = 仅 Delete -->
-    <g mask="url(#maskOnlyDelete)">
-      <use href="#cDelete" class="region region-I"/>
-    </g>
-    <!-- II = 仅 Replace -->
-    <g mask="url(#maskOnlyReplace)">
-      <use href="#cReplace" class="region region-II"/>
-    </g>
-    <!-- III = 仅 Rewrite -->
-    <g mask="url(#maskOnlyRewrite)">
-      <use href="#cRewrite" class="region region-III"/>
-    </g>
-
-    <!-- IV = Replace ∩ Delete -->
-    <g clip-path="url(#clipReplace)">
-      <use href="#cDelete" class="region region-IV"/>
-    </g>
-    <!-- V = Replace ∩ Rewrite -->
-    <g clip-path="url(#clipReplace)">
-      <use href="#cRewrite" class="region region-V"/>
-    </g>
-    <!-- VI = Delete ∩ Rewrite -->
-    <g clip-path="url(#clipDelete)">
-      <use href="#cRewrite" class="region region-VI"/>
-    </g>
-    <!-- VII = Replace ∩ Delete ∩ Rewrite -->
-    <g clip-path="url(#clipReplace)">
+    <!-- ====== 交互高亮层 ====== -->
+    <g class="fade" id="layer-interactive">
+      <g mask="url(#maskOnlyDelete)">
+        <use href="#cDelete" class="region region-I"/>
+      </g>
+      <g mask="url(#maskOnlyReplace)">
+        <use href="#cReplace" class="region region-II"/>
+      </g>
+      <g mask="url(#maskOnlyRewrite)">
+        <use href="#cRewrite" class="region region-III"/>
+      </g>
+      <g clip-path="url(#clipReplace)">
+        <use href="#cDelete" class="region region-IV"/>
+      </g>
+      <g clip-path="url(#clipReplace)">
+        <use href="#cRewrite" class="region region-V"/>
+      </g>
       <g clip-path="url(#clipDelete)">
-        <use href="#cRewrite" class="region region-VII"/>
+        <use href="#cRewrite" class="region region-VI"/>
+      </g>
+      <g clip-path="url(#clipReplace)">
+        <g clip-path="url(#clipDelete)">
+          <use href="#cRewrite" class="region region-VII"/>
+        </g>
       </g>
     </g>
-  </g>
 
-  <!-- ====== 文本层（最上层，同样淡入） ====== -->
-  <g class="fade" id="layer-text">
-    <text x="345" y="38"  class="title">Replace</text>
-    <text x="0"   y="614" class="title">Delete</text>
-    <text x="840" y="501" class="title">Rewrite</text>
+    <!-- ====== 文本层 ====== -->
+    <g class="fade" id="layer-text">
+      <text x="345" y="38"  class="title">Replace</text>
+      <text x="0"   y="614" class="title">Delete</text>
+      <text x="840" y="501" class="title">Rewrite</text>
 
-    <text x="262" y="511" class="rlabel">I</text>
-    <text x="424" y="226" class="rlabel">II</text>
-    <text x="671" y="461" class="rlabel">III</text>
-    <text x="365" y="366" class="rlabel">IV</text>
-    <text x="511" y="343" class="rlabel">V</text>
-    <text x="458" y="500" class="rlabel">VI</text>
-    <text x="445" y="405" class="rlabel">VII</text>
+      <text x="262" y="511" class="rlabel">I</text>
+      <text x="424" y="226" class="rlabel">II</text>
+      <text x="671" y="461" class="rlabel">III</text>
+      <text x="365" y="366" class="rlabel">IV</text>
+      <text x="511" y="343" class="rlabel">V</text>
+      <text x="458" y="500" class="rlabel">VI</text>
+      <text x="445" y="405" class="rlabel">VII</text>
+    </g>
+
   </g>
 </svg>
 
@@ -173,7 +164,7 @@
     setTimeout(()=>document.getElementById('layer-text').classList.add('show'), 160);
   });
 
-  // 可选：悬停时把区域名字写到 title（浏览器默认 tooltip）
+  // 悬停默认 tooltip（可选）
   document.querySelectorAll('.region').forEach((el)=>{
     const name = Array.from(el.classList).find(c=>c.startsWith('region-'))?.split('-')[1] || '';
     const t = document.createElementNS('http://www.w3.org/2000/svg','title');
@@ -183,4 +174,3 @@
 </script>
 </body>
 </html>
-
