@@ -1,4 +1,22 @@
 <!DOCTYPE html>
+<style>
+  html,body{ margin:0; padding:0; background:#fff; }
+  /* 关键：让图随容器宽度缩放 */
+  svg{ width:100%; height:auto; display:block; }
+</style>
+
+<script>
+  function sendHeight(){
+    const h = Math.max(
+      document.body.scrollHeight, document.documentElement.scrollHeight,
+      document.body.offsetHeight, document.documentElement.offsetHeight
+    );
+    parent.postMessage({ __chartHeight: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  new ResizeObserver(sendHeight).observe(document.body);
+</script>
+
 <html lang="zh-CN">
 <meta charset="utf-8"/>
 <title>Venn — Exact Intersections + Fade-in + 7-region Hover</title>
