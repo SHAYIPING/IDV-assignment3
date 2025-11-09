@@ -5,23 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Basis Vectors – hover dot</title>
 
-<!-- D3 + fallback -->
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script>if(!window.d3){document.write('<script src="https://unpkg.com/d3@7/dist/d3.min.js"><\/script>')}</script>
-
+<!-- 让 SVG 随容器宽度缩放；body 去掉边距；把真实高度发给父页 -->
 <style>
   :root{
-    --bg:#ffffff;   /* 纯白背景 */
-    --ink:#222;
-    --grid:#cfd8e3;
-    --solid:#6b7280;
-    --dash1:#1f7a8c;
-    --dash2:#56b3b4;
-    --label:#111;
+    --bg:#ffffff; --ink:#222; --grid:#cfd8e3; --solid:#6b7280;
+    --dash1:#1f7a8c; --dash2:#56b3b4; --label:#111;
   }
-  body{ margin:0; background:var(--bg); color:var(--ink);
-        font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
-  svg{ display:block; margin:24px auto; background:#fff; }
+  html,body{ margin:0; background:#fff; color:var(--ink);
+             font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
+  /* 关键：宽度 100%，高度自适应，保持 viewBox 等比缩放 */
+  svg{ width:100%; height:auto; display:block; background:#fff; margin:0 auto; }
   .grid line{ stroke:var(--grid); stroke-width:1 }
   .vector{ stroke-linecap:round }
   .vector.solid{ stroke:var(--solid); stroke-width:2 }
@@ -29,7 +22,6 @@
   .vector.dash2{ stroke:var(--dash2); stroke-width:2; stroke-dasharray:8 8 }
   .hit{ stroke:transparent; stroke-width:30; pointer-events:stroke } /* 更大的命中带 */
   .point{ fill:var(--ink) }
-  /* 标签：e 粗斜体；上标斜体；下标常规体 */
   .label-e{ fill:var(--label); font-weight:700; font-style:italic }
   .label-sup{ fill:var(--label); font-style:italic }
   .label-sub{ fill:var(--label); font-weight:400; font-style:normal }
@@ -40,10 +32,28 @@
     white-space:nowrap
   }
 </style>
+
+<script>
+  // 将页面真实高度发送给父页，使父页 iframe 自适应
+  function sendHeight(){
+    const h = Math.max(
+      document.body.scrollHeight, document.documentElement.scrollHeight,
+      document.body.offsetHeight, document.documentElement.offsetHeight
+    );
+    parent.postMessage({ __chartHeight: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  new ResizeObserver(sendHeight).observe(document.body);
+</script>
+
+<!-- D3 + fallback -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>if(!window.d3){document.write('<script src="https://unpkg.com/d3@7/dist/d3.min.js"><\/script>')}</script>
 </head>
 <body>
 
-<svg id="viz" width="1100" height="440" viewBox="0 0 1100 440"></svg>
+<!-- viewBox 已补齐，确保等比缩放 -->
+<svg id="viz" width="1100" height="440" viewBox="0 0 1100 440" aria-label="basis vectors chart"></svg>
 <div id="tooltip" class="tooltip"></div>
 
 <script>
@@ -69,19 +79,14 @@
                        .attr("x2", gridW).attr("y2", r*cell);
   }
 
-  // ---------- markers: V apex at end (wider angle) ----------
+  // ---------- markers ----------
   const defs = svg.append("defs");
   function makeVMarker(id, color){
     const m = defs.append("marker")
-      .attr("id", id)
-      .attr("viewBox","0 0 12 12")
-      .attr("refX", 12)     // 尖端在终点
-      .attr("refY", 6)
-      .attr("markerWidth", 9)
-      .attr("markerHeight", 9)
-      .attr("orient","auto")
-      .attr("markerUnits","strokeWidth");
-    // 分叉更大
+      .attr("id", id).attr("viewBox","0 0 12 12")
+      .attr("refX", 12).attr("refY", 6)
+      .attr("markerWidth", 9).attr("markerHeight", 9)
+      .attr("orient","auto").attr("markerUnits","strokeWidth");
     m.append("path").attr("d","M12 6 L2 1")
       .attr("fill","none").attr("stroke", color)
       .attr("stroke-width", 2).attr("stroke-linecap","round");
@@ -160,23 +165,17 @@
   const tooltip = d3.select("#tooltip");
 
   hitPath.on("mousemove", function(event, d){
-    // 计算最近点
     const [mx,my] = d3.pointer(event, g.node());
     const pt = closestPointOnSegment(d.from.x, d.from.y, d.to.x, d.to.y, mx, my);
 
-    hoverDot
-      .attr("cx", pt.x)
-      .attr("cy", pt.y)
-      .attr("fill", d.color)
-      .attr("opacity", 1);
+    hoverDot.attr("cx", pt.x).attr("cy", pt.y).attr("fill", d.color).attr("opacity", 1);
 
-    tooltip
-      .style("left", event.clientX+"px")
-      .style("top",  event.clientY+"px")
-      .style("opacity", 1)
-      .html(`<b>${d.label}</b>
-             <div>t = ${pt.t.toFixed(2)}</div>
-             <div>(${Math.round(pt.x/cell)}, ${Math.round(pt.y/cell)})</div>`);
+    tooltip.style("left", event.clientX+"px")
+           .style("top",  event.clientY+"px")
+           .style("opacity", 1)
+           .html(`<b>${d.label}</b>
+                  <div>t = ${pt.t.toFixed(2)}</div>
+                  <div>(${Math.round(pt.x/cell)}, ${Math.round(pt.y/cell)})</div>`);
   })
   .on("mouseleave", function(){
     hoverDot.attr("opacity", 0);
@@ -213,4 +212,3 @@
 </script>
 </body>
 </html>
-
