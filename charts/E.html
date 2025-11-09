@@ -1,1 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="utf-8"/>
+<title>Venn — Exact Intersections + Fade-in + 7-region Hover</title>
+<style>
+  html,body{margin:0;background:#fff}
+  svg{display:block;margin:0 auto;background:#fff}
+  text{font-family:"Times New Roman", Georgia, serif; fill:#111}
+  .title{font-size:46px;font-weight:200}
+  .rlabel{font-size:48px;font-weight:300;text-anchor:middle;dominant-baseline:middle}
+
+  /* 渐入过渡 */
+  .fade{opacity:0; transition:opacity .8s ease;}
+  .fade.show{opacity:1;}
+
+  /* 交互高亮层（7个区域同一风格） */
+  .region{
+    fill:#ffffff;                 /* 用白色提亮，不改变原色体系 */
+    fill-opacity:0;               /* 默认看不见，仅用于 hover 高亮 */
+    stroke:#111; stroke-opacity:0;
+    transition:fill-opacity .18s ease, stroke-opacity .18s ease;
+    pointer-events:all;           /* 区域可响应鼠标事件 */
+  }
+  .region:hover{
+    fill-opacity:.35;             /* 悬停时提亮 */
+    stroke-opacity:.65;           /* 并给一条细描边 */
+  }
+</style>
+
+<body>
+<svg width="1200" height="800" viewBox="0 0 1200 800" aria-label="Venn diagram">
+
+  <!-- ====== 几何定义 ====== -->
+  <defs>
+    <!-- 三个圆 -->
+    <circle id="cReplace" cx="434" cy="267" r="200"/>
+    <circle id="cDelete"  cx="314" cy="481" r="200"/>
+    <circle id="cRewrite" cx="606" cy="438" r="200"/>
+
+    <!-- clip：单圆域（用于求交：A∩B = 在 clip(A) 内画 B） -->
+    <clipPath id="clipReplace"><use href="#cReplace"/></clipPath>
+    <clipPath id="clipDelete"><use  href="#cDelete"/></clipPath>
+    <clipPath id="clipRewrite"><use href="#cRewrite"/></clipPath>
+
+    <!-- mask：仅 A 的“排他区域”（A \ (B ∪ C)) -->
+    <mask id="maskOnlyReplace" maskUnits="userSpaceOnUse">
+      <rect width="1200" height="800" fill="black"/>
+      <!-- 保留 Replace -->
+      <use href="#cReplace" fill="white"/>
+      <!-- 把 Replace∩Delete 和 Replace∩Rewrite 置黑剔除 -->
+      <g clip-path="url(#clipReplace)"><use href="#cDelete"  fill="black"/></g>
+      <g clip-path="url(#clipReplace)"><use href="#cRewrite" fill="black"/></g>
+    </mask>
+
+    <mask id="maskOnlyDelete" maskUnits="userSpaceOnUse">
+      <rect width="1200" height="800" fill="black"/>
+      <use href="#cDelete" fill="white"/>
+      <g clip-path="url(#clipDelete)"><use href="#cReplace" fill="black"/></g>
+      <g clip-path="url(#clipDelete)"><use href="#cRewrite" fill="black"/></g>
+    </mask>
+
+    <mask id="maskOnlyRewrite" maskUnits="userSpaceOnUse">
+      <rect width="1200" height="800" fill="black"/>
+      <use href="#cRewrite" fill="white"/>
+      <g clip-path="url(#clipRewrite)"><use href="#cReplace" fill="black"/></g>
+      <g clip-path="url(#clipRewrite)"><use href="#cDelete"  fill="black"/></g>
+    </mask>
+  </defs>
+
+  <!-- ====== 视觉层（带整体淡入） ====== -->
+  <g class="fade" id="layer-visual">
+    <!-- 1) 三个主圆（单独区域较深） -->
+    <use href="#cReplace" fill="#bca8ab" fill-opacity=".75"/>
+    <use href="#cDelete"  fill="#cfc7e6" fill-opacity=".75"/>
+    <use href="#cRewrite" fill="#ead27a" fill-opacity=".75"/>
+
+    <!-- 2) 两两交集（IV、V、VI 提亮） -->
+    <!-- IV = Replace ∩ Delete -->
+    <g clip-path="url(#clipReplace)">
+      <use href="#cDelete" fill="#e9e3ec" fill-opacity=".90"/>
+    </g>
+    <!-- V = Replace ∩ Rewrite -->
+    <g clip-path="url(#clipReplace)">
+      <use href="#cRewrite" fill="#f6edbf" fill-opacity=".90"/>
+    </g>
+    <!-- VI = Delete ∩ Rewrite -->
+    <g clip-path="url(#clipDelete)">
+      <use href="#cRewrite" fill="#eee9f8" fill-opacity=".90"/>
+    </g>
+
+    <!-- 3) 三重交集 VII = Replace ∩ Delete ∩ Rewrite（最亮） -->
+    <g clip-path="url(#clipReplace)">
+      <g clip-path="url(#clipDelete)">
+        <use href="#cRewrite" fill="#f9f8f0" fill-opacity=".98"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ====== 交互高亮层（7 个区域，默认透明，hover 显示） ====== -->
+  <g class="fade" id="layer-interactive">
+    <!-- I = 仅 Delete -->
+    <g mask="url(#maskOnlyDelete)">
+      <use href="#cDelete" class="region region-I"/>
+    </g>
+    <!-- II = 仅 Replace -->
+    <g mask="url(#maskOnlyReplace)">
+      <use href="#cReplace" class="region region-II"/>
+    </g>
+    <!-- III = 仅 Rewrite -->
+    <g mask="url(#maskOnlyRewrite)">
+      <use href="#cRewrite" class="region region-III"/>
+    </g>
+
+    <!-- IV = Replace ∩ Delete -->
+    <g clip-path="url(#clipReplace)">
+      <use href="#cDelete" class="region region-IV"/>
+    </g>
+    <!-- V = Replace ∩ Rewrite -->
+    <g clip-path="url(#clipReplace)">
+      <use href="#cRewrite" class="region region-V"/>
+    </g>
+    <!-- VI = Delete ∩ Rewrite -->
+    <g clip-path="url(#clipDelete)">
+      <use href="#cRewrite" class="region region-VI"/>
+    </g>
+    <!-- VII = Replace ∩ Delete ∩ Rewrite -->
+    <g clip-path="url(#clipReplace)">
+      <g clip-path="url(#clipDelete)">
+        <use href="#cRewrite" class="region region-VII"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ====== 文本层（最上层，同样淡入） ====== -->
+  <g class="fade" id="layer-text">
+    <text x="345" y="38"  class="title">Replace</text>
+    <text x="0"   y="614" class="title">Delete</text>
+    <text x="840" y="501" class="title">Rewrite</text>
+
+    <text x="262" y="511" class="rlabel">I</text>
+    <text x="424" y="226" class="rlabel">II</text>
+    <text x="671" y="461" class="rlabel">III</text>
+    <text x="365" y="366" class="rlabel">IV</text>
+    <text x="511" y="343" class="rlabel">V</text>
+    <text x="458" y="500" class="rlabel">VI</text>
+    <text x="445" y="405" class="rlabel">VII</text>
+  </g>
+</svg>
+
+<script>
+  // 触发渐入
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('layer-visual').classList.add('show');
+    setTimeout(()=>document.getElementById('layer-interactive').classList.add('show'), 80);
+    setTimeout(()=>document.getElementById('layer-text').classList.add('show'), 160);
+  });
+
+  // 可选：悬停时把区域名字写到 title（浏览器默认 tooltip）
+  document.querySelectorAll('.region').forEach((el)=>{
+    const name = Array.from(el.classList).find(c=>c.startsWith('region-'))?.split('-')[1] || '';
+    const t = document.createElementNS('http://www.w3.org/2000/svg','title');
+    t.textContent = name;
+    el.appendChild(t);
+  });
+</script>
+</body>
+</html>
 
