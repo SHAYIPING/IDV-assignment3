@@ -42,18 +42,57 @@
   </section>
 
   <aside class="right-col">
-    <div class="notes">
-      <div>
-        <h3>Notes</h3>
-        <h4>Canvas &amp; Grid</h4><p>Consistent margins; responsive SVG with viewBox.</p>
-        <h4>Key Points</h4>
-        <ul><li>Axes, ticks, labels styled to match reference.</li><li>Paths driven by measured control points.</li></ul>
-        <h4>Animation</h4><p>Opacity + stroke-dash transitions.</p>
-        <h4>Interaction</h4><p>Mouse→SVG mapping + closest-point search along path.</p>
-      </div>
-      <div style="height:24px;"></div>
-    </div>
-  </aside>
+  <div class="notes">
+    <section class="notes">
+      <h3>Notes / Code-based Venn Diagram</h3>
+
+      <h4>1) Define Three Circles</h4>
+      <p>
+        Each circle represents one set — <strong>Replace</strong>, <strong>Delete</strong>, and <strong>Rewrite</strong>.
+        Positions are controlled by the circle center <code>(cx, cy)</code> and radius <code>r</code>.
+        Adjusting these values changes how much the circles overlap.
+      </p>
+
+      <h4>2) Use <code>clipPath</code> for Intersections</h4>
+      <p>
+        <code>clipPath</code> acts like a stencil — it keeps only the overlapping parts of shapes.
+        Drawing <em>Delete</em> inside the clip of <em>Replace</em> produces the intersection
+        <strong>Replace ∩ Delete</strong>.
+      </p>
+
+      <h4>3) Use <code>mask</code> for Exclusive Areas</h4>
+      <p>
+        <code>mask</code> works like an eraser: white keeps, black removes.
+        It is used to retain only the parts that belong to a single circle (non-overlapping regions).
+      </p>
+
+      <h4>4) Three-Layer Structure</h4>
+      <ul>
+        <li><strong>Visual layer</strong> — shows colors and brightness for the 7 logical regions.</li>
+        <li><strong>Interactive layer</strong> — transparent overlay for hover detection and highlighting.</li>
+        <li><strong>Text layer</strong> — displays titles and Roman numerals.</li>
+      </ul>
+
+      <h4>5) Fade-in Transition</h4>
+      <p>
+        On page load, layers fade in sequentially for a smooth, polished appearance.
+      </p>
+
+      <h4>6) Mouse Interaction</h4>
+      <p>
+        All 7 regions are interactive. On hover, a region becomes brighter and gains an outline.
+      </p>
+
+      <h4>7) Result Summary</h4>
+      <p>
+        Outer regions are darker, two-way overlaps are lighter, and the center (three-way overlap) is brightest —
+        producing a clear, layered, and intuitive Venn diagram.
+      </p>
+    </section>
+    <div style="height:24px;"></div>
+  </div>
+</aside>
+
 </div>
 
 <script>
