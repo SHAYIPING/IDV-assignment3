@@ -41,34 +41,86 @@
     <div class="figure-grid">
       <div class="figitem">
         <div class="img"><img src="figs/B-info.jpg" alt="说明图 B"></div>
-        <div class="caption"><strong>说明图 B：</strong>方案 B 的核心构型与坐标定位。</div>
+        <div class="caption"><strong>A：</strong>Wrong scale and position</div>
       </div>
       <div class="figitem">
         <div class="img"><img src="figs/B1-info.jpg" alt="说明图 B1"></div>
-        <div class="caption"><strong>说明图 B1：</strong>补充边界条件与关键标注，辅助理解交互细节。</div>
+        <div class="caption"><strong>B：</strong>Give the coordinates of the points</div>
       </div>
     </div>
   </section>
 
-  <aside class="right-col">
-    <div class="notes">
-      <div>
-        <h3>Notes</h3>
-        <h4>Canvas &amp; Grid</h4>
-        <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
-        <h4>Key Points</h4>
-        <ul>
-          <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
-          <li>Vectors: 4 solids + 2 dashed arrows with V-shaped markers.</li>
-        </ul>
-        <h4>Animation</h4><p>Stroke-dash trick draws lines in from start to end.</p>
-        <h4>Interaction</h4><p>Wide invisible hit stroke + hover dot + tooltip.</p>
-        <h4>Design Choices</h4>
-        <ul><li>Times family</li><li>Grey background</li></ul>
-      </div>
-      <div style="height:24px;"></div>
-    </div>
-  </aside>
+ <aside class="right-col">
+  <div class="notes">
+    <section class="notes">
+      <h3>Notes / Pixel-Placed Curves & Interaction</h3>
+
+      <h4>1) Coordinate system & layout</h4>
+      <p>
+        Use a fixed, pixel-based layout: axes sit at exact x/y pixel positions.
+        The left chart includes a base bar, a filled bar, a dashed-frame bar, and a short purple arrow.
+      </p>
+
+      <h4>2) Style tokens</h4>
+      <ul>
+        <li><code>.axis</code> — thick black axes.</li>
+        <li><code>.tick</code> — short tick marks.</li>
+        <li><code>.label</code> — text labels.</li>
+        <li>Purple fill is semi-transparent.</li>
+        <li>Dotted lines use <code>stroke-dasharray</code>.</li>
+      </ul>
+
+      <h4>3) Scales (if needed)</h4>
+      <p>
+        If values need mapping to pixels, define simple linear scales:
+        x ∈ [0,1], y ∈ [0,40]. Otherwise, place shapes directly by pixel coordinates.
+      </p>
+
+      <h4>4) Axes & ticks</h4>
+      <p>
+        Draw horizontal and vertical axes first, then add short ticks and labels.
+        Keep axis geometry fixed — no animations changing widths or dash patterns.
+      </p>
+
+      <h4>5) Bars & arrow on the left</h4>
+      <p>
+        Place the base bar, filled bar, and dashed-frame bar at fixed x positions.
+        Add a short purple arrow pointing to the key value.
+      </p>
+
+      <h4>6) Curve data on the right</h4>
+      <p>
+        Collect measured anchor points (x, y). Convert them using scales if applied,
+        or keep pixel positions directly.
+      </p>
+
+      <h4>7) Smooth path generation</h4>
+      <p>
+        Use Catmull–Rom to cubic Bézier conversion so the path passes smoothly through every anchor point.
+      </p>
+
+      <h4>8) Transitions</h4>
+      <p>
+        Apply opacity fade-in for the curves and a subtle slide-in for the short arrow.
+        Do not alter dash patterns, line widths, or geometry during transitions.
+      </p>
+
+      <h4>9) Hover interaction</h4>
+      <p>
+        On the right chart, show a small dot at the nearest point and a tooltip displaying axis values
+        (x in [0,1], y in [0,40]).
+      </p>
+
+      <h4>10) Visual integrity</h4>
+      <p>
+        Hover and animation effects should not disturb the original chart style —
+        axes thickness, dash patterns, and layout remain unchanged.
+      </p>
+    </section>
+
+    <div style="height:24px;"></div>
+  </div>
+</aside>
 </div>
 
 <!-- 自适应 iframe 高度：load + postMessage 双方案 -->
