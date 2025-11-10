@@ -32,28 +32,77 @@
     <div class="figure-grid">
       <div class="figitem">
         <div class="img"><img src="figs/D-info.jpg" alt="说明图 D"></div>
-        <div class="caption"><strong>说明图 D：</strong>结构/数据的对应关系。</div>
+        <div class="caption"><strong>A：</strong>Give the coordinates of the points</div>
       </div>
       <div class="figitem">
         <div class="img"><img src="figs/D1-info.jpg" alt="说明图 D1"></div>
-        <div class="caption"><strong>说明图 D1：</strong>关键坐标/标尺与注释。</div>
+        <div class="caption"><strong>B：</strong>Wrong curve position</div>
       </div>
     </div>
   </section>
 
   <aside class="right-col">
-    <div class="notes">
-      <div>
-        <h3>Notes</h3>
-        <h4>Canvas &amp; Grid</h4><p>SVG with consistent viewBox for scaling.</p>
-        <h4>Key Points</h4>
-        <ul><li>Same layering and stroke styles as slides.</li><li>Interactive overlay decoupled from visible paths.</li></ul>
-        <h4>Animation</h4><p>Segment draw-in + arrow fade-in.</p>
-        <h4>Interaction</h4><p>Screen→SVG coordinate mapping via CTM inverse.</p>
-      </div>
-      <div style="height:24px;"></div>
-    </div>
-  </aside>
+  <div class="notes">
+    <section class="notes">
+      <h3>Notes / Code-based Chart (D3.js)</h3>
+
+      <h4>1) Create the Drawing Canvas</h4>
+      <p>
+        Create an <code>&lt;svg&gt;</code> element as the drawing board (810×529 px).
+        All shapes and lines are drawn inside it.
+        Add margins so the chart doesn’t touch the edges, then define the inner width and height for the drawing area.
+      </p>
+
+      <h4>2) Create x and y Scales</h4>
+      <p>
+        Use <code>d3.scaleLinear()</code> to map data values to pixel positions.<br/>
+        x-axis: from –2 → 5 (left → right)<br/>
+        y-axis: from 0 → 0.35 (bottom → top)
+      </p>
+
+      <h4>3) Convert Pixel Anchor Points to Data</h4>
+      <p>
+        The yellow and green pixel coordinates are converted to real data values using the inverse of the scales.
+      </p>
+
+      <h4>4) Draw Background Grid and Smooth Curves</h4>
+      <p>
+        Draw light-gray grid lines with <code>d3.axisBottom()</code> and <code>d3.axisLeft()</code>.
+        Hide the main axis lines, keeping only tick numbers.
+        Use <code>d3.line().curve(d3.curveBasis)</code> to connect data points smoothly.
+        There are two curves: yellow (<code>.curve0</code>) and green (<code>.curve1</code>).
+      </p>
+
+      <h4>5) Add Shaded Areas</h4>
+      <p>
+        Use <code>d3.area()</code> to create shaded areas below the curves.
+        Apply <code>clipPath</code> to keep only the right half of the yellow curve and the left half of the green curve.
+      </p>
+
+      <h4>6) Draw Dashed Lines</h4>
+      <p>
+        Split the x-axis dashed line into two parts, leaving a blank gap in the center.
+        Vertical dashed lines start at the x-axis and extend upward to the curves.
+      </p>
+
+      <h4>7) Add Animation</h4>
+      <p>
+        Curves are drawn gradually using the <code>stroke-dashoffset</code> trick.
+        Dashed lines fade in slightly later.
+        Shaded areas fade in afterward with opacity changing from 0 → 0.45.
+      </p>
+
+      <h4>8) Add Hover Interaction</h4>
+      <p>
+        Invisible “hit lines” are used to detect the mouse.
+        When hovering: find the nearest data point → show a small circle → display tooltip with (x, y) values.
+      </p>
+    </section>
+
+    <div style="height:24px;"></div>
+  </div>
+</aside>
+
 </div>
 
 <script>
