@@ -51,29 +51,61 @@
   </section>
 
   <!-- 右列：Notes -->
-  <aside class="right-col">
-    <div class="notes">
-      <div>
-        <h3>Notes</h3>
+<aside class="right-col">
+  <div class="notes">
+    <section class="notes">
+      <h3>Notes / Grid Vectors with Arrowheads</h3>
 
-        <h4>Canvas &amp; Grid</h4>
-        <p>Use <code>&lt;svg&gt;</code> with <code>viewBox</code> for responsive scaling; center the grid via group translation.</p>
+      <h4>1) Canvas & Grid</h4>
+      <p>
+        Use <code>&lt;svg&gt;</code> as the canvas. Compute margins so an 11×4 grid
+        (cell size 80 px) is centered within the SVG.
+      </p>
 
-        <h4>Key Points</h4>
-        <ul>
-          <li>Points: eβ₂(3,3), eβ₁(6,3), eα₂(5,1), eα₁(8,1).</li>
-          <li>Vectors: 4 solid segments + 2 dashed arrows (custom V-shaped markers).</li>
-        </ul>
+      <h4>2) Key Points</h4>
+      <p>
+        Define four points in grid coordinates and convert them to pixel positions:<br/>
+        eβ₂ (3, 3),  eβ₁ (6, 3),  eα₂ (5, 1),  eα₁ (8, 1).
+      </p>
 
-        <h4>Animation</h4>
-        <p>Stroke-dash draw-in for each segment.</p>
+      <h4>3) Vectors</h4>
+      <p>
+        Draw six vectors in total:<br/>
+        • 4 solid segments — β₂→α₂,  β₁→α₁,  β₂→β₁,  α₂→α₁.<br/>
+        • 2 dashed arrows — α₁→β₂,  α₂→β₁.
+      </p>
 
-        <h4>Interaction</h4>
-        <p>Invisible wide hit-stroke; show closest point (hover dot) + tooltip.</p>
-      </div>
-      <div style="height:24px;"></div>
-    </div>
-  </aside>
+      <h4>4) Arrowheads</h4>
+      <p>
+        Use custom V-shaped markers whose apex is positioned at the end of the line.
+        Set <code>refX = 12</code> and <code>refY = 6</code> so the arrow tip points exactly to the target point.
+      </p>
+
+      <h4>5) Animation</h4>
+      <p>
+        Apply the stroke-dash technique to animate line drawing.
+        Start with a large dash offset and gradually reduce
+        <code>stroke-dashoffset → 0</code> so each line is drawn from start to end.
+      </p>
+
+      <h4>6) Interaction</h4>
+      <p>
+        Add a wide invisible <code>.hit</code> stroke (~30 px) above each vector to capture hover events.
+        When hovering, place a small dot at the closest point on the segment
+        and show a tooltip with its label and coordinates.
+      </p>
+
+      <h4>7) Visual Consistency</h4>
+      <p>
+        Solid and dashed lines distinguish relation types.
+        Arrowheads appear only on directed links.
+        Grid and axes remain unchanged during animations for a stable visual layout.
+      </p>
+    </section>
+
+    <div style="height:24px;"></div>
+  </div>
+</aside>
 </div>
 
 <script>
