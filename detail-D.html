@@ -6,8 +6,16 @@
 <title>D – Assignment 3</title>
 <link rel="stylesheet" href="styles.css"/>
 <style>
-.chart-slab{ background:#fff; border:1px solid var(--line); border-radius:8px; box-shadow:0 2px 14px rgba(0,0,0,.07); padding:0; overflow:hidden; display:flex; flex-direction:column; }
-.chart-frame{ width:100%; height:560px; border:0; display:block; background:#fff; overflow:hidden; }
+.chart-slab{
+  background:#fff; border:1px solid var(--line); border-radius:8px;
+  box-shadow:0 2px 14px rgba(0,0,0,.07); padding:0; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+/* ❗去掉固定高度；高由脚本设置 */
+.chart-frame{
+  width:100%; border:0; display:block; background:#fff; overflow:hidden;
+}
+
 .detail-wrap{ align-items:start; }
 .left-col,.right-col{ display:flex; flex-direction:column; }
 .notes{ flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; height:100%; }
@@ -108,19 +116,27 @@
 <script>
 (function(){
   const frame = document.getElementById('chartD');
+
   function resizeByRead(){
     try{
       const doc = frame.contentDocument || frame.contentWindow.document;
-      const h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight, doc.body.offsetHeight, doc.documentElement.offsetHeight);
+      const h = Math.max(
+        doc.body.scrollHeight, doc.documentElement.scrollHeight,
+        doc.body.offsetHeight, doc.documentElement.offsetHeight
+      );
       if (h && Math.abs(frame.clientHeight - h) > 5) frame.style.height = h + 'px';
     }catch(e){}
   }
-  frame.addEventListener('load', resizeByRead);
-  window.addEventListener('message', (e)=>{
+
+  function onMsg(e){
     if (!e.data || e.data.__chartHeight == null) return;
-    const H = Math.max(320, Math.min(1200, e.data.__chartHeight));
-    frame.style.height = H + 'px';
-  });
+    const H = Math.max(320, Math.min(2000, e.data.__chartHeight));
+    if (Math.abs(frame.clientHeight - H) > 2) frame.style.height = H + 'px';
+  }
+
+  frame.addEventListener('load', resizeByRead);
+  window.addEventListener('message', onMsg);
+  window.addEventListener('resize', resizeByRead);
 })();
 </script>
 </body>
