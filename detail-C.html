@@ -45,23 +45,85 @@
     </div>
   </section>
 
-  <aside class="right-col">
-    <div class="notes">
-      <div>
-        <h3>Notes</h3>
-        <h4>Canvas &amp; Grid</h4>
-        <p>Use <code>&lt;svg&gt;</code> as the canvas; compute margins so the grid is centered.</p>
-        <h4>Key Points</h4>
-        <ul>
-          <li>Two subplots replicated with pixel-placed anchors.</li>
-          <li>Vector/curve layers and markers follow slide styling.</li>
-        </ul>
-        <h4>Animation</h4><p>Stroke-dash / fade-in for lines and arrows.</p>
-        <h4>Interaction</h4><p>Hover area + dot + tooltip mapped by SVG coordinates.</p>
-      </div>
-      <div style="height:24px;"></div>
-    </div>
-  </aside>
+ <aside class="right-col">
+  <div class="notes">
+    <section class="notes">
+      <h3>Notes / D3.js Bar Chart (Step-by-Step)</h3>
+
+      <h4>1) Setup page</h4>
+      <p>
+        Create an HTML page, add an <code>&lt;svg&gt;</code> canvas (e.g., 990×511 px), and load the D3.js library.
+      </p>
+
+      <h4>2) Define CSS roles</h4>
+      <ul>
+        <li><code>.frame</code> — gray border around the chart.</li>
+        <li><code>.bar</code> — visible solid yellow bars.</li>
+        <li><code>.ghost</code> — dashed bars with transparent fill; used for hover hit-testing.</li>
+        <li><code>.highlight</code> — red, bold text when active.</li>
+      </ul>
+
+      <h4>3) Prepare data</h4>
+      <p>
+        Store model names and values in an array (e.g., <code>[{name:"Model A", value:92}, …]</code>).
+      </p>
+
+      <h4>4) Create scales</h4>
+      <ul>
+        <li><strong>x</strong>: band scale to position each bar evenly across the width.</li>
+        <li><strong>y</strong>: linear scale mapping value → bar height.</li>
+      </ul>
+
+      <h4>5) Layout groups</h4>
+      <p>
+        Add a main <code>&lt;g&gt;</code> with margins (top/right/bottom/left) so axes and labels don’t touch edges.
+      </p>
+
+      <h4>6) Draw frame and axes</h4>
+      <ul>
+        <li>Draw a rectangular border using class <code>.frame</code>.</li>
+        <li>Add the x-axis (model names) and y-axis (percent ticks).</li>
+      </ul>
+
+      <h4>7) Draw bars (from zero)</h4>
+      <p>
+        Append one rect per datum with class <code>.bar</code>. Start at height 0, then animate to full height.
+      </p>
+
+      <h4>8) Add “ghost” hit areas</h4>
+      <p>
+        Overlay matching dashed rects with class <code>.ghost</code> (transparent fill) above the bars to make
+        hover detection easy and forgiving.
+      </p>
+
+      <h4>9) Labels and ticks</h4>
+      <p>
+        Add chart title, axis tick labels, and value labels above each bar (e.g., “94%”).
+      </p>
+
+      <h4>10) Interactions — hover highlight</h4>
+      <ul>
+        <li>On mouseover of a <code>.ghost</code>, apply <code>.highlight</code> to the corresponding value label.</li>
+        <li>On mouseout, remove the highlight.</li>
+      </ul>
+
+      <h4>11) Transitions timing</h4>
+      <ul>
+        <li>Animate bar heights first (0 → value).</li>
+        <li>Optionally fade in labels/ticks afterward.</li>
+      </ul>
+
+      <h4>12) Responsiveness &amp; accessibility</h4>
+      <ul>
+        <li>Use <code>viewBox</code> + <code>preserveAspectRatio</code> for a responsive SVG.</li>
+        <li>Add <code>aria-label</code> or a <code>&lt;title&gt;</code> tag on bars so screen readers can read values.</li>
+      </ul>
+    </section>
+
+    <div style="height:24px;"></div>
+  </div>
+</aside>
+
 </div>
 
 <script>
