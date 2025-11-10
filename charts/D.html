@@ -1,36 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<style>
-  html,body{ margin:0; padding:0; background:#fff; }
-  /* 关键：让图随容器宽度缩放 */
-  svg{ width:100%; height:auto; display:block; }
-</style>
-
-<script>
-  function sendHeight(){
-    const h = Math.max(
-      document.body.scrollHeight, document.documentElement.scrollHeight,
-      document.body.offsetHeight, document.documentElement.offsetHeight
-    );
-    parent.postMessage({ __chartHeight: h }, '*');
-  }
-  window.addEventListener('load', sendHeight);
-  new ResizeObserver(sendHeight).observe(document.body);
-</script>
 <meta charset="utf-8"/>
 <title>D3.js — Probability Density (transition + hover, delayed areas)</title>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
 <style>
-  html,body{margin:0;background:#fff}
-  svg{display:block;margin:0 auto;background:#fff}
+  html,body{ margin:0; padding:0; background:#fff }
+  /* ✅ 响应式：依赖 viewBox，宽度100%，高度自动按比例 */
+  svg{ width:100%; height:auto; display:block; background:#fff }
+
   text{font-family:"Times New Roman", Georgia, serif; fill:#111}
 
   .grid line{stroke:#d9d9d9; stroke-width:1}
   .grid path{display:none}
 
-  /* 坐标字号（x、y 刻度） */
   .tick text{font-size:20px}
-
   .label-x{font-size:18px}
   .label-y{font-size:34px}
 
@@ -40,22 +24,32 @@
   .vline{stroke:#222; stroke-dasharray:6 6; stroke-width:3}
   .xline{stroke:#222; stroke-dasharray:6 6; stroke-width:2; stroke-linecap:butt}
 
-  /* ⚠️ 灰色面积不再在 CSS 里设置 opacity，改由 JS 动画控制 fill-opacity */
   .shade{fill:#888;}
 
   .legend{font-size:28px; font-style:italic}
 
-  /* 命中层：用于捕捉鼠标事件的隐形粗线 */
   .hit{ fill:none; stroke:transparent; stroke-width:18px; pointer-events:stroke }
 
-  /* 悬浮提示样式（SVG 内） */
   .tip-bg{ fill:#fff; stroke:#333; stroke-width:.8; rx:6; ry:6 }
   .tip-txt{ font-size:14px; fill:#111 }
 </style>
+
 <body>
-<svg id="chart" width="810" height="529"></svg>
+<!-- ✅ 仅设置 viewBox，不再写固定 width/height -->
+<svg id="chart" viewBox="0 0 810 529" preserveAspectRatio="xMidYMid meet"></svg>
 
 <script>
+/* ===== 把 SVG 实际像素高度同步给父页，让 iframe 自适应 ===== */
+function sendHeight(){
+  const r = document.getElementById('chart').getBoundingClientRect();
+  const h = Math.ceil(r.height);
+  parent.postMessage({ __chartHeight: h }, '*');
+}
+window.addEventListener('load', sendHeight);
+new ResizeObserver(sendHeight).observe(document.getElementById('chart'));
+window.addEventListener('resize', sendHeight);
+
+/* ===== 原有 D3 代码（未改动绘制逻辑与数据） ===== */
 const svg = d3.select("#chart");
 const W = 810, H = 529;
 
@@ -110,7 +104,6 @@ band.append("rect")
 band.selectAll(".vgrid").data(x.ticks(8)).enter().append("line")
   .attr("x1",d=>x(d)).attr("x2",d=>x(d)).attr("y1",0).attr("y2",bandH)
   .attr("stroke","#e6e6e6");
-/* 顶边虚线交给后面的 x 轴虚线绘制（两段），此处不画整段 */
 band.append("line")
   .attr("x1",0).attr("x2",innerW).attr("y1",bandH).attr("y2",bandH)
   .attr("stroke","#d9d9d9").attr("stroke-width",1);
@@ -212,12 +205,11 @@ fadeIn(xDashR,600,500);
 fadeIn(vL,600,500);
 fadeIn(vR,600,500);
 
-/* ⚠️ 灰色面积在曲线完全绘制后才淡入（>=1550ms 之后） */
-fadeInArea(areaYellow, 800, 1000); // 黄色面积更晚出现
-fadeInArea(areaGreen,  800, 1100); // 绿色面积再晚一点
+/* 灰色面积在曲线完全绘制后才淡入（>=1550ms 之后） */
+fadeInArea(areaYellow, 800, 1000);
+fadeInArea(areaGreen,  800, 1100);
 
 /* ===== 悬停交互：显示最近点坐标 ===== */
-/* 命中层：隐形粗线用来捕捉鼠标 */
 curveLayer.append("path")
   .attr("class","hit")
   .attr("d", lineBasis(yellow))
